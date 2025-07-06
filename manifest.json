@@ -1,21 +1,34 @@
 {
-  "short_name": "Data App",
-  "name": "Data Collector App",
+  "short_name": "AF App",
+  "name": "Advance Fertilizer Data App",
+  "description": "แอปพลิเคชันสำหรับเก็บข้อมูลร้านค้าและเกษตรกร",
   "icons": [
     {
-      "src": "https://raw.githubusercontent.com/google/material-design-icons/master/src/social/person_add/materialicons/192px.svg",
-      "type": "image/svg+xml",
-      "sizes": "192x192"
+      "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png",
+      "type": "image/png",
+      "sizes": "48x48"
     },
     {
-      "src": "https://raw.githubusercontent.com/google/material-design-icons/master/src/social/person_add/materialicons/512px.svg",
-      "type": "image/svg+xml",
+      "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_96dp.png",
+      "type": "image/png",
+      "sizes": "96x96"
+    },
+    {
+      "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_192dp.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_512dp.png",
+      "type": "image/png",
       "sizes": "512x512"
     }
   ],
-  "start_url": "index.html",
+  "start_url": ".",
+  "scope": ".",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f9fafb",
-  "theme_color": "#ffffff"
+  "theme_color": "#22c55e"
 }
