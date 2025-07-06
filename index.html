@@ -142,14 +142,20 @@
         const formModalContainer = document.getElementById('form-modal-container');
         const loginForm = document.getElementById('login-form');
 
-        // --- Authentication & Initialization ---
-        function initializeApp() {
-            loginView.classList.remove('active');
-            mainAppView.classList.add('active');
-            showPage('dashboard');
+        // --- Generic Fetch Function ---
+        async function apiCall(payload) {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
         }
 
-        function handleLogin(e) {
+        // --- Authentication & Initialization ---
+        async function handleLogin(e) {
             e.preventDefault();
             const username = e.target.username.value;
             const password = e.target.password.value;
@@ -159,27 +165,30 @@
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             submitButton.disabled = true;
 
-            fetch(`${SCRIPT_URL}?action=login&username=${username}&password=${password}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.result === 'success' && data.user) {
-                        currentUser = data.user;
-                        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-                        initializeApp();
-                    } else {
-                        loginError.textContent = data.message || 'Username หรือ Password ไม่ถูกต้อง';
-                    }
-                })
-                .catch(err => {
-                    console.error("Login Fetch Error:", err);
-                    loginError.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
-                })
-                .finally(() => {
-                    submitButton.innerHTML = 'เข้าสู่ระบบ';
-                    submitButton.disabled = false;
-                });
+            try {
+                const data = await apiCall({ action: 'login', username, password });
+                if (data.result === 'success' && data.user) {
+                    currentUser = data.user;
+                    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    initializeApp();
+                } else {
+                    loginError.textContent = data.message || 'Username หรือ Password ไม่ถูกต้อง';
+                }
+            } catch (err) {
+                console.error("Login Fetch Error:", err);
+                loginError.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+            } finally {
+                submitButton.innerHTML = 'เข้าสู่ระบบ';
+                submitButton.disabled = false;
+            }
         }
         
+        function initializeApp() {
+            loginView.classList.remove('active');
+            mainAppView.classList.add('active');
+            showPage('dashboard');
+        }
+
         function handleLogout() {
             sessionStorage.removeItem('currentUser');
             location.reload();
@@ -298,25 +307,24 @@
             const data = Object.fromEntries(formData.entries());
             const isEdit = data.rowId && data.rowId !== '';
             
-            const postData = { 
+            const payload = { 
                 action: isEdit ? 'updateData' : 'saveData', 
                 payload: data 
             };
-            if(!isEdit) data.createdBy = currentUser.username;
-
+            if(!isEdit) payload.payload.createdBy = currentUser.username;
 
             try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', // Use no-cors for simple POST to Apps Script
-                    body: JSON.stringify(postData)
-                });
-                showMessageModal(isEdit ? 'แก้ไขข้อมูลสำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!');
-                closeFormModal();
-                await fetchData(true);
+                const response = await apiCall(payload);
+                if (response.result === 'success') {
+                    showMessageModal(isEdit ? 'แก้ไขข้อมูลสำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!');
+                    closeFormModal();
+                    await fetchData(true);
+                } else {
+                    throw new Error(response.message || 'Unknown error from server');
+                }
             } catch (error) {
                 console.error("Submit Error:", error);
-                showMessageModal('เกิดข้อผิดพลาดในการบันทึก');
+                showMessageModal(`เกิดข้อผิดพลาดในการบันทึก: ${error.message}`);
             } finally {
                 submitButton.innerHTML = isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มข้อมูล';
                 submitButton.disabled = false;
@@ -333,16 +341,18 @@
             if(emptyFeed) emptyFeed.textContent = 'กำลังโหลดข้อมูล...';
             if(emptyFeed) emptyFeed.classList.remove('hidden');
             
-            const params = new URLSearchParams({ action: 'getData', username: currentUser.username, role: currentUser.role, team: currentUser.team || '' });
-
             try {
-                const response = await fetch(`${SCRIPT_URL}?${params.toString()}`);
-                const data = await response.json();
-                if(Array.isArray(data)) {
-                    allData = data;
+                const response = await apiCall({
+                    action: 'getData',
+                    username: currentUser.username,
+                    role: currentUser.role,
+                    team: currentUser.team || ''
+                });
+                if(response.result === 'success' && Array.isArray(response.data)) {
+                    allData = response.data;
                     renderAllTabs();
                 } else {
-                   throw new Error("Invalid data format from server");
+                   throw new Error(response.message || "Invalid data format from server");
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
