@@ -1,0 +1,21 @@
+{
+  "short_name": "Data App",
+  "name": "Data Collector App",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/google/material-design-icons/master/src/social/person_add/materialicons/192px.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/google/material-design-icons/master/src/social/person_add/materialicons/512px.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f9fafb",
+  "theme_color": "#ffffff"
+}
