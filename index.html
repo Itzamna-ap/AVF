@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Data Collector App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- PWA Manifest & Theme -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/1D4ED8/FFFFFF?text=App">
+
+    <style>
+        body { font-family: 'Sarabun', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .view { display: none; }
+        .view.active { display: block; }
+        .bottom-nav-item.active svg, .bottom-nav-item.active span { color: #2563EB; }
+        .body-no-scroll { overflow: hidden; }
+        .form-input {
+            width: 100%;
+            background-color: #f3f4f6; /* bg-gray-100 */
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 0.75rem; /* p-3 */
+            font-size: 0.875rem; /* text-sm */
+            line-height: 1.25rem;
+            transition: box-shadow 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #3b82f6; /* ring-2 ring-blue-500 */
+        }
+        .form-label {
+            display: block;
+            font-weight: 500; /* font-medium */
+            color: #4b5563; /* text-gray-600 */
+            margin-bottom: 0.5rem; /* mb-2 */
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- ===== Login View ===== -->
+    <div id="login-view" class="view active flex items-center justify-center min-h-screen bg-white">
+        <div class="w-full max-w-sm p-8">
+            <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Data Collector</h1>
+            <form id="login-form">
+                <input id="username" type="text" placeholder="ชื่อผู้ใช้ (Username)" class="form-input mb-3">
+                <input id="password" type="password" placeholder="รหัสผ่าน (Password)" class="form-input mb-4">
+                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-md transition-colors">
+                    เข้าสู่ระบบ
+                </button>
+                <p id="login-error" class="text-red-500 text-center text-sm mt-4"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== Main App View ===== -->
+    <div id="main-app-view" class="view pb-20">
+        <header class="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center z-10">
+            <h1 class="text-2xl font-bold text-gray-800">ข้อมูลทั้งหมด</h1>
+            <button id="logout-button"><i class="fas fa-sign-out-alt text-xl text-gray-600"></i></button>
+        </header>
+
+        <main id="content-area" class="p-2 sm:p-4">
+            <div id="feed-content" class="page-content active space-y-4">
+                <div id="loading-feed" class="text-center py-10"><i class="fas fa-spinner fa-spin text-3xl text-gray-400"></i></div>
+                <div id="feed-container"></div>
+                <p id="empty-feed" class="text-center text-gray-500 py-10" style="display: none;">ไม่มีข้อมูลให้แสดง</p>
+            </div>
+            <div id="map-content" class="page-content" style="display: none;">
+                 <div id="map" class="h-[calc(100vh-150px)] w-full rounded-lg shadow"></div>
+            </div>
+        </main>
+
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-2 z-10">
+            <button onclick="showPage('feed')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2 active">
+                <i class="fas fa-home text-2xl"></i><span class="text-xs mt-1">หน้าหลัก</span>
+            </button>
+            <button onclick="openAddModal()" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2">
+                <i class="fas fa-plus-square text-2xl"></i><span class="text-xs mt-1">เพิ่มข้อมูล</span>
+            </button>
+            <button onclick="showPage('map')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2">
+                <i class="fas fa-map-marked-alt text-2xl"></i><span class="text-xs mt-1">แผนที่</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- ===== Add Data Modal/Form ===== -->
+    <div id="add-modal" class="fixed inset-0 bg-gray-50 z-20 transform translate-y-full transition-transform duration-300 ease-in-out">
+        <div class="h-full flex flex-col">
+            <header class="p-4 flex items-center border-b bg-white sticky top-0">
+                <button onclick="closeAddModal()"><i class="fas fa-times text-2xl text-gray-600"></i></button>
+                <h2 id="form-title" class="text-xl font-bold text-center flex-grow">สร้างข้อมูลใหม่</h2>
+                 <div class="w-6"></div>
+            </header>
+            <div id="form-container" class="p-4 overflow-y-auto flex-grow">
+                <!-- Form content will be injected here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Message Modal -->
+    <div id="message-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center w-11/12 max-w-sm">
+            <p id="modal-message" class="text-lg"></p>
+            <button onclick="closeMessageModal()" class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-md w-full">ตกลง</button>
+        </div>
+    </div>
+
+    <script>
+        // --- PWA Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW registered.')).catch(err => console.log('SW registration failed:', err));
+            });
+        }
+
+        // --- IMPORTANT: PASTE YOUR SCRIPT URL HERE ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWYuttyt5bFw3h7jzUhEaWBpowkLikqILd5kaL0V6b_jveMP1Tdpd1gPGqJmqexcLS1g/exec';
+
+        // --- App State & DOM Elements ---
+        let currentUser = null;
+        let allData = [];
+        let map = null;
+        const loginView = document.getElementById('login-view');
+        const mainAppView = document.getElementById('main-app-view');
+        const loginForm = document.getElementById('login-form');
+        const logoutButton = document.getElementById('logout-button');
+        const feedContainer = document.getElementById('feed-container');
+        const addModal = document.getElementById('add-modal');
+        const formContainer = document.getElementById('form-container');
+        const formTitle = document.getElementById('form-title');
+
+        // --- Authentication ---
+        loginForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const username = e.target.username.value;
+            const password = e.target.password.value;
+            const loginError = document.getElementById('login-error');
+            loginError.textContent = '';
+            const submitButton = e.target.querySelector('button');
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            submitButton.disabled = true;
+
+            fetch(`${SCRIPT_URL}?action=login&username=${username}&password=${password}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.result === 'success' && data.user) {
+                        currentUser = data.user;
+                        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        initializeApp();
+                    } else {
+                        loginError.textContent = data.message || 'Username หรือ Password ไม่ถูกต้อง';
+                    }
+                })
+                .catch(err => loginError.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ')
+                .finally(() => {
+                    submitButton.innerHTML = 'เข้าสู่ระบบ';
+                    submitButton.disabled = false;
+                });
+        });
+
+        logoutButton.addEventListener('click', () => {
+            sessionStorage.removeItem('currentUser');
+            location.reload();
+        });
+
+        function checkSession() {
+            const user = sessionStorage.getItem('currentUser');
+            if (user) {
+                currentUser = JSON.parse(user);
+                initializeApp();
+            }
+        }
+
+        function initializeApp() {
+            loginView.classList.remove('active');
+            mainAppView.classList.add('active');
+            showPage('feed');
+        }
+
+        // --- UI Navigation ---
+        function showPage(pageName) {
+            document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
+            document.getElementById(`${pageName}-content`).style.display = 'block';
+            const headerTitle = mainAppView.querySelector('h1');
+            if (pageName === 'feed') headerTitle.textContent = 'ข้อมูลทั้งหมด';
+            if (pageName === 'map') headerTitle.textContent = 'แผนที่';
+            document.querySelectorAll('.bottom-nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`button[onclick="showPage('${pageName}')"]`).classList.add('active');
+            if (pageName === 'feed' && allData.length === 0) fetchData();
+            if (pageName === 'map') initMap();
+        }
+
+        // --- Add Data Modal & Form Generation ---
+        function openAddModal() {
+            formTitle.textContent = 'สร้างข้อมูลใหม่';
+            formContainer.innerHTML = `
+                <div class="text-center space-y-4 pt-10">
+                    <button onclick="showForm('store')" class="w-full max-w-xs text-lg bg-blue-500 text-white py-4 rounded-lg shadow-md"><i class="fas fa-store mr-3"></i>เพิ่มข้อมูลร้านค้า</button>
+                    <button onclick="showForm('farmer')" class="w-full max-w-xs text-lg bg-green-500 text-white py-4 rounded-lg shadow-md"><i class="fas fa-leaf mr-3"></i>เพิ่มข้อมูลเกษตรกร</button>
+                    <button onclick="showForm('trial')" class="w-full max-w-xs text-lg bg-purple-500 text-white py-4 rounded-lg shadow-md"><i class="fas fa-vial mr-3"></i>เพิ่มข้อมูลแปลงทดลอง</button>
+                </div>
+            `;
+            addModal.classList.remove('translate-y-full');
+            document.body.classList.add('body-no-scroll');
+        }
+        
+        function closeAddModal() {
+            addModal.classList.add('translate-y-full');
+            document.body.classList.remove('body-no-scroll');
+        }
+
+        function showForm(type) {
+            let html = '';
+            let title = '';
+            let formType = '';
+
+            if (type === 'store') {
+                title = 'ข้อมูลร้านค้า';
+                formType = 'ร้านค้า';
+                html = `
+                    <h3 class="text-lg font-bold mb-4">ส่วนข้อมูลร้านค้า</h3>
+                    <div class="space-y-4">
+                        <div><label class="form-label">ชื่อร้านค้า</label><input name="storeName" class="form-input" required></div>
+                        <div><label class="form-label">สถานะ</label><select name="storeStatus" class="form-input"><option>ร้านเก่า</option><option>ร้านใหม่</option></select></div>
+                        <div><label class="form-label">GPS</label><div class="flex"><input name="gps" id="gps-input" class="form-input rounded-r-none"><button type="button" onclick="getGeoLocation('gps-input')" class="bg-blue-500 text-white px-4 rounded-r-lg"><i class="fas fa-map-marker-alt"></i></button></div></div>
+                        <div><label class="form-label">ขนาดร้านค้า</label><input name="storeSize" class="form-input"></div>
+                        <div><label class="form-label">เปิดมากี่ปี</label><input name="yearsOpen" type="number" class="form-input"></div>
+                        <div><label class="form-label">สินค้าหลัก</label><input name="mainProducts" class="form-input"></div>
+                        <div><label class="form-label">ยอดปุ๋ย/ปี</label><input name="fertilizerSalesPerYear" class="form-input"></div>
+                        <div><label class="form-label">การจ่ายเงิน</label><input name="paymentMethod" class="form-input"></div>
+                    </div>
+                    <h3 class="text-lg font-bold mt-6 mb-4">ส่วนพฤติกรรมเจ้าของร้าน</h3>
+                    <div class="space-y-4">
+                        <div><label class="form-label">ชื่อ-สกุล เจ้าของ</label><input name="ownerName" class="form-input"></div>
+                        <div><label class="form-label">เบอร์โทร</label><input name="ownerPhone" class="form-input"></div>
+                        <div><label class="form-label">เพศ</label><select name="ownerGender" class="form-input"><option>ชาย</option><option>หญิง</option></select></div>
+                        <div><label class="form-label">อายุ</label><input name="ownerAge" type="number" class="form-input"></div>
+                        <div><label class="form-label">เป็นคนประเภทใด</label><select name="ownerPersonality" class="form-input"><option>ชอบเจ๊าะแจ๊ะ</option><option>ชอบข้อมูล</option><option>ชอบทดลอง</option><option>ชอบต่อราคา</option></select></div>
+                        <div><label class="form-label">แนวคิดการตลาดปุ๋ย</label><textarea name="fertilizerMarketingConcept" class="form-input"></textarea></div>
+                    </div>
+                `;
+            } else if (type === 'farmer') {
+                title = 'ข้อมูลเกษตรกร';
+                formType = 'เกษตรกร';
+                html = `
+                    <div class="space-y-4">
+                        <div><label class="form-label">ชื่อ-สกุล</label><input name="farmerName" class="form-input" required></div>
+                        <div><label class="form-label">เบอร์โทร</label><input name="farmerPhone" class="form-input"></div>
+                        <div><label class="form-label">ที่อยู่</label><textarea name="farmerAddress" class="form-input"></textarea></div>
+                        <div><label class="form-label">ปลูกอะไร</label><input name="cropsGrown" class="form-input"></div>
+                        <div><label class="form-label">ปลูกกี่ไร่</label><input name="farmArea" type="number" class="form-input"></div>
+                        <div><label class="form-label">ความคิดเรื่องปุ๋ยอินทรีย์</label><textarea name="organicFertilizerOpinion" class="form-input"></textarea></div>
+                    </div>
+                `;
+            } else if (type === 'trial') {
+                title = 'ข้อมูลแปลงทดลอง';
+                formType = 'แปลงทดลอง';
+                html = `
+                    <h3 class="text-lg font-bold mb-4">ข้อมูลการขอทำแปลง</h3>
+                    <div class="space-y-4">
+                        <div><label class="form-label">ชื่อ-สกุล เจ้าของสวน</label><input name="trialFarmerName" class="form-input" required></div>
+                        <div><label class="form-label">พืชที่ต้องการทดลอง</label><input name="trialCrop" class="form-input"></div>
+                        <div><label class="form-label">GPS แปลง</label><div class="flex"><input name="plotGps" id="gps-input" class="form-input rounded-r-none"><button type="button" onclick="getGeoLocation('gps-input')" class="bg-blue-500 text-white px-4 rounded-r-lg"><i class="fas fa-map-marker-alt"></i></button></div></div>
+                    </div>
+                    <h3 class="text-lg font-bold mt-6 mb-4">ข้อมูลการติดตามผล</h3>
+                    <div class="space-y-4">
+                        <div><label class="form-label">ผลเป็นไปตามคาดหวังหรือไม่</label><select name="isOutcomeAsExpected" class="form-input"><option>ใช่</option><option>ไม่</option><option>ยังไม่ทราบ</option></select></div>
+                        <div><label class="form-label">การเปลี่ยนแปลงของพืช</label><textarea name="plantChange" class="form-input"></textarea></div>
+                        <div><label class="form-label">โอกาสที่จะซื้อหลังทดลอง</label><input name="purchaseLikelihood" class="form-input"></div>
+                    </div>
+                `;
+            }
+
+            formTitle.textContent = title;
+            formContainer.innerHTML = `
+                <form id="data-form" class="space-y-4">
+                    <input type="hidden" name="formType" value="${formType}">
+                    ${html}
+                    <button type="submit" class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-md">บันทึกข้อมูล</button>
+                </form>
+            `;
+            document.getElementById('data-form').addEventListener('submit', handleFormSubmit);
+        }
+
+        // --- Data Handling ---
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
+            submitButton.disabled = true;
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            data.createdBy = currentUser.username;
+
+            const postData = { action: 'saveData', payload: data };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(postData)
+            })
+            .then(() => {
+                showMessageModal('บันทึกข้อมูลสำเร็จ!');
+                closeAddModal();
+                fetchData(true);
+            }).catch(error => {
+                showMessageModal('เกิดข้อผิดพลาดในการบันทึก');
+            }).finally(() => {
+                submitButton.innerHTML = 'บันทึกข้อมูล';
+                submitButton.disabled = false;
+            });
+        }
+
+        function fetchData(force = false) {
+            if (!currentUser) return;
+            if (allData.length > 0 && !force) {
+                renderFeed(allData);
+                return;
+            }
+            const loadingFeed = document.getElementById('loading-feed');
+            const emptyFeed = document.getElementById('empty-feed');
+            loadingFeed.style.display = 'block';
+            feedContainer.innerHTML = '';
+            emptyFeed.style.display = 'none';
+            
+            const params = new URLSearchParams({ action: 'getData', username: currentUser.username, role: currentUser.role, team: currentUser.team || '' });
+
+            fetch(`${SCRIPT_URL}?${params.toString()}`)
+                .then(res => res.json())
+                .then(data => {
+                    allData = data;
+                    renderFeed(allData);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    emptyFeed.textContent = 'ไม่สามารถโหลดข้อมูลได้';
+                    emptyFeed.style.display = 'block';
+                })
+                .finally(() => {
+                    loadingFeed.style.display = 'none';
+                });
+        }
+
+        function renderFeed(data) {
+            feedContainer.innerHTML = '';
+            const emptyFeed = document.getElementById('empty-feed');
+            if (data.length === 0) {
+                emptyFeed.style.display = 'block';
+                return;
+            }
+            emptyFeed.style.display = 'none';
+
+            data.forEach(item => {
+                const isStore = item.formType === 'ร้านค้า';
+                const isTrial = item.formType === 'แปลงทดลอง';
+                let name = 'N/A';
+                let subtext = '';
+                let iconClass = '';
+                let colorClass = '';
+                let gps = item.gps || item.plotGps;
+                
+                if (isStore) {
+                    name = item.storeName;
+                    subtext = `เจ้าของ: ${item.ownerName || 'N/A'}`;
+                    iconClass = 'fa-store';
+                    colorClass = 'bg-blue-100 text-blue-500';
+                } else if (isTrial) {
+                    name = `แปลงทดลอง: ${item.trialFarmerName}`;
+                    subtext = `พืช: ${item.trialCrop || 'N/A'}`;
+                    iconClass = 'fa-vial';
+                    colorClass = 'bg-purple-100 text-purple-500';
+                } else { // Farmer
+                    name = item.farmerName;
+                    subtext = `ปลูก: ${item.cropsGrown || 'N/A'}`;
+                    iconClass = 'fa-leaf';
+                    colorClass = 'bg-green-100 text-green-500';
+                }
+                
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-200 rounded-lg shadow-sm';
+                card.innerHTML = `
+                    <div class="p-3 flex items-center space-x-3 border-b">
+                        <div class="w-10 h-10 rounded-full ${colorClass} flex items-center justify-center flex-shrink-0">
+                            <i class="fas ${iconClass}"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800 leading-tight">${name}</p>
+                            <p class="text-sm text-gray-500">${subtext}</p>
+                        </div>
+                    </div>
+                    <div class="h-48 bg-gray-200 flex items-center justify-center text-gray-400">
+                        <i class="fas fa-image text-4xl"></i>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-sm text-gray-700">สร้างโดย: ${item.createdBy || 'N/A'}</p>
+                        ${gps ? `<a href="https://www.google.com/maps/dir/?api=1&destination=${gps}" target="_blank" class="inline-block text-blue-500 text-sm mt-1 hover:underline">
+                                    <i class="fas fa-map-marker-alt mr-1"></i> ดูตำแหน่ง
+                                 </a>` : ''}
+                    </div>
+                `;
+                feedContainer.appendChild(card);
+            });
+        }
+
+        // --- Map Functionality ---
+        function initMap() {
+            if (map) { map.remove(); map = null; }
+            map = L.map('map').setView([13.7563, 100.5018], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const coords = [pos.coords.latitude, pos.coords.longitude];
+                    map.setView(coords, 13);
+                    L.marker(coords).addTo(map).bindPopup('<b>ตำแหน่งของคุณ</b>').openPopup();
+                });
+            }
+            if (allData.length > 0) plotDataOnMap();
+        }
+
+        function plotDataOnMap() {
+            allData.forEach(item => {
+                const gps = item.gps || item.plotGps;
+                if (gps && gps.includes(',')) {
+                    const [lat, lon] = gps.split(',').map(Number);
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        const isStore = item.formType === 'ร้านค้า';
+                        const isTrial = item.formType === 'แปลงทดลอง';
+                        const name = isStore ? item.storeName : (isTrial ? `แปลง: ${item.trialFarmerName}` : item.farmerName);
+                        const iconColor = isStore ? 'blue' : (isTrial ? 'violet' : 'green');
+                        const markerIcon = new L.Icon({
+                            iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${iconColor}.png`,
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+                        });
+                        const popupContent = `<b>${name}</b><br><a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}" target="_blank">นำทาง</a>`;
+                        L.marker([lat, lon], {icon: markerIcon}).addTo(map).bindPopup(popupContent);
+                    }
+                }
+            });
+        }
+        
+        // --- Utility Functions ---
+        function getGeoLocation(elementId) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => { document.getElementById(elementId).value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`; },
+                    err => { showMessageModal(`เกิดข้อผิดพลาด: ${err.message}`); }
+                );
+            } else { showMessageModal("เบราว์เซอร์ไม่รองรับ Geolocation"); }
+        }
+
+        function showMessageModal(message) {
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('message-modal').style.display = 'flex';
+        }
+
+        function closeMessageModal() {
+            document.getElementById('message-modal').style.display = 'none';
+        }
+
+        // --- Initial Load ---
+        checkSession();
+    </script>
+</body>
+</html>
