@@ -1,29 +1,24 @@
-const CACHE_NAME = 'advance-fertilizer-cache-v4'; // Updated version to force refresh
+const CACHE_NAME = 'advance-fertilizer-cache-v5'; // Updated version to force refresh
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json',
-  'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
-  'https://cdn.jsdelivr.net/npm/chart.js',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-  'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+  './manifest.json'
+  // We will no longer cache external CDN assets as they cause CORS issues.
+  // The browser will handle caching them.
 ];
 
-// Install event: caches core assets.
+// Install event: caches core assets of our app.
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Service Worker: Caching core assets');
+        console.log('Service Worker: Caching core local assets');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-// Activate event: removes old caches.
+// Activate event: removes old caches to keep the app updated.
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -43,13 +38,13 @@ self.addEventListener('activate', event => {
 // Fetch event: Defines how to handle requests.
 self.addEventListener('fetch', event => {
   // Strategy: Network Only for API calls.
-  // This ensures data is always fresh.
+  // This ensures data is always fresh and avoids CORS issues with POST requests.
   if (event.request.url.includes('script.google.com')) {
-    event.respondWith(fetch(event.request));
+    // Do not intercept API calls. Let the browser handle it.
     return;
   }
 
-  // Strategy: Cache First for all other (static asset) requests.
+  // Strategy: Cache First, then Network for local assets.
   // This makes the app load fast.
   event.respondWith(
     caches.match(event.request)
@@ -58,13 +53,8 @@ self.addEventListener('fetch', event => {
         if (cachedResponse) {
           return cachedResponse;
         }
-        // Otherwise, fetch it from the network, cache it, and return it.
-        return fetch(event.request).then(networkResponse => {
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        });
+        // Otherwise, fetch it from the network. The browser will handle CDN caching.
+        return fetch(event.request);
       })
   );
 });
