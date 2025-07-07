@@ -23,9 +23,10 @@
 
         .page-content, .tab-content { display: none; }
         .page-content.active, .tab-content.active { display: block; }
-
-        .bottom-nav-item.active { color: #ec4899; }
-        .tab-button.active { color: #ec4899; background-color: #fff; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
+        
+        /* FIX for active state UI */
+        .bottom-nav-item[data-active='true'] { color: #ec4899; }
+        .tab-button[data-active='true'] { color: #ec4899; background-color: #fff; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); font-weight: 700; }
         
         .form-input, .form-select, .form-textarea { width: 100%; background-color: #fff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem; font-size: 1rem; transition: box-shadow 0.2s, border-color 0.2s; }
         .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.4); }
@@ -40,7 +41,6 @@
 </head>
 <body class="overscroll-none">
 
-    <!-- ===== Login View ===== -->
     <div id="login-view" class="view active place-items-center min-h-screen">
         <div class="w-full max-w-sm p-8 space-y-6">
             <div class="text-center"><img src="https://img5.pic.in.th/file/secure-sv1/428709424_3685682595091856_2231537038448980245_n.th.jpg" class="w-24 h-24 mx-auto rounded-full shadow-md"><h1 class="text-4xl font-bold text-gray-800 mt-4">Advance Fertilizer</h1><p class="text-gray-500">กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p></div>
@@ -53,19 +53,15 @@
         </div>
     </div>
 
-    <!-- ===== Main App View ===== -->
     <div id="main-app-view" class="view">
         <div class="flex flex-col h-screen">
-            <!-- Header -->
             <header class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-10">
                  <button id="back-button" class="hidden text-xl text-gray-600 w-8 text-left"><i class="fas fa-chevron-left"></i></button>
                 <h1 id="header-title" class="text-xl font-bold text-gray-800 text-center flex-grow">ภาพรวม</h1>
                 <button id="logout-button" class="text-xl text-gray-600 w-8 text-right"><i class="fas fa-sign-out-alt"></i></button>
             </header>
             
-            <!-- Main Content -->
             <main class="flex-1 overflow-y-auto p-4 pb-24">
-                <!-- Dashboard Page -->
                 <div id="dashboard-page" class="page-content active">
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">ร้านค้า</p><p id="store-count" class="text-3xl font-bold text-blue-500">0</p></div>
@@ -73,7 +69,6 @@
                     </div>
                     <div class="bg-white p-4 rounded-lg shadow-sm"><h3 class="font-bold mb-2 text-center">สัดส่วนข้อมูล</h3><div class="max-w-xs mx-auto"><canvas id="doughnutChart"></canvas></div></div>
                 </div>
-                <!-- Feed Page (List View) -->
                 <div id="feed-page" class="page-content">
                     <div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold text-gray-800">ข้อมูลลูกค้า</h1><button onclick="showAddFormSelection()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><i class="fas fa-plus"></i><span>เพิ่ม</span></button></div>
                     <div class="p-1 bg-gray-200 rounded-lg flex space-x-1 mb-4"><button onclick="showTab('stores')" class="tab-button w-1/3 py-2 rounded-md" data-active="true">ร้านค้า</button><button onclick="showTab('farmers')" class="tab-button w-1/3 py-2 rounded-md">เกษตรกร</button><button onclick="showTab('trials')" class="tab-button w-1/3 py-2 rounded-md">แปลงทดลอง</button></div>
@@ -85,13 +80,10 @@
                     </div>
                     <p id="empty-feed" class="hidden text-center text-gray-500 py-10">ไม่มีข้อมูล</p>
                 </div>
-                <!-- Detail Page -->
                 <div id="detail-page" class="page-content"></div>
-                <!-- Map Page -->
                 <div id="map-page" class="page-content"><div id="map" class="h-full w-full rounded-lg shadow-md min-h-[calc(100vh-160px)]"></div></div>
             </main>
 
-            <!-- Bottom Navigation -->
             <nav class="bg-white border-t flex justify-around p-2 fixed bottom-0 w-full z-10">
                 <button onclick="showPage('dashboard')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2 w-1/3" data-active="true"><i class="fas fa-chart-pie text-2xl"></i><span class="text-xs mt-1">ภาพรวม</span></button>
                 <button onclick="showPage('feed')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2 w-1/3"><i class="fas fa-users text-2xl"></i><span class="text-xs mt-1">ลูกค้า</span></button>
@@ -100,17 +92,14 @@
         </div>
     </div>
     
-    <!-- Add/Edit Data Modal -->
     <div id="form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-30 flex items-center justify-center p-4">
         <div id="form-modal-container" class="form-modal-content bg-gray-50 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"></div>
     </div>
     
-    <!-- Message Modal -->
     <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
         <div class="bg-white p-6 rounded-lg shadow-xl text-center w-11/12 max-w-sm"><p id="modal-message" class="text-lg"></p><button onclick="closeMessageModal()" class="mt-4 bg-pink-500 text-white px-6 py-2 rounded-md w-full">ตกลง</button></div>
     </div>
 
-    <!-- Loading Overlay -->
     <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex flex-col items-center justify-center text-white">
         <i class="fas fa-spinner fa-spin text-4xl"></i>
         <p id="loading-text" class="mt-4 text-lg">กำลังโหลดข้อมูล...</p>
@@ -225,7 +214,8 @@
             
             const navItems = document.querySelectorAll('.bottom-nav-item');
             navItems.forEach(item => {
-                item.dataset.active = item.getAttribute('onclick').includes(`showPage('${pageName}')`);
+                const isActive = item.getAttribute('onclick').includes(`showPage('${pageName}')`);
+                item.dataset.active = isActive;
             });
             
             const header = document.getElementById('header-title');
