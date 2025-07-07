@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class=""> <!-- Class for dark mode is controlled by JS -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Advance Fertilizer</title>
+    <title>Advance Fertilizer 2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -16,48 +16,63 @@
     <link rel="apple-touch-icon" href="https://img5.pic.in.th/file/secure-sv1/428709424_3685682595091856_2231537038448980245_n.th.jpg">
 
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f4f5f7; }
+        /* Base styles */
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: #f4f5f7;
+            transition: background-color 0.3s ease;
+        }
         .view { display: none !important; }
         .view.active { display: grid !important; }
+        #main-app-view.active { display: block !important; } /* Changed for main view */
         #login-view.active { display: grid !important; }
-        
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        
-        /* FIX for active state UI */
+
+        /* Dark Mode Styles */
+        .dark body { background-color: #111827; }
+        .dark .bg-white { background-color: #1f2937; }
+        .dark .bg-gray-50 { background-color: #374151; }
+        .dark .bg-gray-200 { background-color: #374151; }
+        .dark .border-b, .dark .border-t { border-color: #374151; }
+        .dark .text-gray-800 { color: #f9fafb; }
+        .dark .text-gray-600 { color: #d1d5db; }
+        .dark .text-gray-500 { color: #9ca3af; }
+        .dark .text-gray-400 { color: #6b7280; }
+        .dark .form-input, .dark .form-select, .dark .form-textarea {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+        .dark .tab-button[data-active='true'] { background-color: #374151; }
+        .dark #header-title { color: #f9fafb; }
+
+        /* Active state UI */
         .bottom-nav-item[data-active='true'] { color: #ec4899; }
         .tab-button[data-active='true'] { color: #ec4899; background-color: #fff; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); font-weight: 700; }
         
-        .form-input, .form-select, .form-textarea { width: 100%; background-color: #fff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem; font-size: 1rem; transition: box-shadow 0.2s, border-color 0.2s; }
+        /* Form styles */
+        .form-input, .form-select, .form-textarea { width: 100%; background-color: #fff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem; font-size: 1rem; transition: all 0.2s; }
         .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.4); }
         .form-label { display: block; font-weight: 500; color: #374151; margin-bottom: 0.5rem; }
+        .dark .form-label { color: #d1d5db; }
 
-        /* --- Animation Styles --- */
-        .page-content {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        .page-content.active {
-            display: block;
-            opacity: 1;
-        }
+        /* Animation Styles */
+        .page-content { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .page-content.active { display: block; opacity: 1; }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .list-item-animation { animation: fadeInUp 0.4s ease-out forwards; opacity: 0; }
+        
+        /* Skeleton Loading Styles */
+        .skeleton {
+            background-color: #e5e7eb;
+            border-radius: 0.5rem;
+            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+        .dark .skeleton { background-color: #374151; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
 
-        .list-item-animation {
-            animation: fadeInUp 0.5s ease-out forwards;
-            opacity: 0; /* Start hidden */
-        }
     </style>
 </head>
 <body class="overscroll-none">
@@ -81,7 +96,12 @@
             <header class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-10">
                 <button id="back-button" class="hidden text-xl text-gray-600 w-8 text-left"><i class="fas fa-chevron-left"></i></button>
                 <h1 id="header-title" class="text-xl font-bold text-gray-800 text-center flex-grow">ภาพรวม</h1>
-                <button id="logout-button" class="text-xl text-gray-600 w-8 text-right"><i class="fas fa-sign-out-alt"></i></button>
+                <div class="flex items-center space-x-4">
+                    <!-- 🌙 START: Dark Mode Toggle -->
+                    <button id="theme-toggle" class="text-xl text-gray-600 w-8"><i class="fas fa-moon"></i></button>
+                    <!-- 🌙 END: Dark Mode Toggle -->
+                    <button id="logout-button" class="text-xl text-gray-600 w-8 text-right"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
             </header>
             
             <main class="flex-1 overflow-y-auto p-4 pb-24">
@@ -90,13 +110,54 @@
                         <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">ร้านค้า</p><p id="store-count" class="text-3xl font-bold text-blue-500">0</p></div>
                         <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">เกษตรกร</p><p id="farmer-count" class="text-3xl font-bold text-green-500">0</p></div>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm"><h3 class="font-bold mb-2 text-center">สัดส่วนข้อมูล</h3><div class="max-w-xs mx-auto"><canvas id="doughnutChart"></canvas></div></div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm"><h3 class="font-bold mb-2 text-center text-gray-800">สัดส่วนข้อมูล</h3><div class="max-w-xs mx-auto"><canvas id="doughnutChart"></canvas></div></div>
                 </div>
                 <div id="feed-page" class="page-content">
                     <div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold text-gray-800">ข้อมูลลูกค้า</h1><button onclick="showAddFormSelection()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><i class="fas fa-plus"></i><span>เพิ่ม</span></button></div>
                     <div class="p-1 bg-gray-200 rounded-lg flex space-x-1 mb-4"><button onclick="showTab('stores')" class="tab-button w-1/3 py-2 rounded-md" data-active="true">ร้านค้า</button><button onclick="showTab('farmers')" class="tab-button w-1/3 py-2 rounded-md">เกษตรกร</button><button onclick="showTab('trials')" class="tab-button w-1/3 py-2 rounded-md">แปลงทดลอง</button></div>
                     <div class="relative mb-4"><input id="search-input" type="text" placeholder="ค้นหาด้วยชื่อ..." class="form-input pl-10"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i></div>
+                    
+                    <!-- 🔍 START: Filter and Sort Controls -->
+                    <div id="filter-sort-controls" class="hidden bg-gray-50 p-2 rounded-lg mb-4 space-y-2 md:space-y-0 md:flex md:items-center md:space-x-4">
+                        <div class="flex-1">
+                            <label class="text-sm font-medium text-gray-500">กรองตามสถานะ:</label>
+                            <select id="filter-select" class="form-select text-sm p-2">
+                                <option value="all">ทั้งหมด</option>
+                                <option value="ร้านใหม่">ร้านใหม่</option>
+                                <option value="ร้านเก่า">ร้านเก่า</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-sm font-medium text-gray-500">จัดเรียง:</label>
+                            <select id="sort-select" class="form-select text-sm p-2">
+                                <option value="newest">ใหม่สุด</option>
+                                <option value="oldest">เก่าสุด</option>
+                                <option value="az">ชื่อ (A-Z)</option>
+                                <option value="za">ชื่อ (Z-A)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- 🔍 END: Filter and Sort Controls -->
+
                     <div id="feed-container">
+                        <!-- 💀 START: Skeleton Loader -->
+                        <div id="skeleton-loader" class="space-y-3">
+                            <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4">
+                                <div class="skeleton w-8 h-8 rounded-full"></div>
+                                <div class="flex-1 space-y-2">
+                                    <div class="skeleton h-4 w-3/4"></div>
+                                    <div class="skeleton h-3 w-1/2"></div>
+                                </div>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4">
+                                <div class="skeleton w-8 h-8 rounded-full"></div>
+                                <div class="flex-1 space-y-2">
+                                    <div class="skeleton h-4 w-2/3"></div>
+                                    <div class="skeleton h-3 w-1/3"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 💀 END: Skeleton Loader -->
                         <div id="stores-tab" class="tab-content active space-y-3"></div>
                         <div id="farmers-tab" class="tab-content space-y-3"></div>
                         <div id="trials-tab" class="tab-content space-y-3"></div>
@@ -128,21 +189,47 @@
     </div>
 
     <script>
-        // --- PWA Service Worker ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW registered.')).catch(err => console.log('SW registration failed:', err));
-            });
-        }
+        // --- SCRIPT START ---
 
-        // --- PASTE YOUR SCRIPT URL HERE ---
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWYuttyt5bFw3h7jzUhEaWBpowkLikqILd5kaL0V6b_jveMP1Tdpd1gPGqJmqexcLS1g/exec';
+        // --- 🌙 START: DARK MODE LOGIC ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeToggleIcon = themeToggle.querySelector('i');
+
+        const applyTheme = (theme) => {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeToggleIcon.className = 'fas fa-sun';
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleIcon.className = 'fas fa-moon';
+            }
+        };
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            applyTheme('dark');
+        } else {
+            applyTheme('light');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const newTheme = isDark ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+        // --- 🌙 END: DARK MODE LOGIC ---
 
         // --- App State & DOM Elements ---
         let currentUser = null;
         let allData = [];
         let map = null;
         let doughnutChartInstance = null;
+        let currentSort = 'newest';
+        let currentFilter = 'all';
+
         const loginView = document.getElementById('login-view');
         const mainAppView = document.getElementById('main-app-view');
         const formModal = document.getElementById('form-modal');
@@ -152,6 +239,14 @@
         const searchInput = document.getElementById('search-input');
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingText = document.getElementById('loading-text');
+        const filterControls = document.getElementById('filter-sort-controls');
+        const filterSelect = document.getElementById('filter-select');
+        const sortSelect = document.getElementById('sort-select');
+        const skeletonLoader = document.getElementById('skeleton-loader');
+        const emptyFeed = document.getElementById('empty-feed');
+
+        // --- PASTE YOUR SCRIPT URL HERE ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWYuttyt5bFw3h7jzUhEaWBpowkLikqILd5kaL0V6b_jveMP1Tdpd1gPGqJmqexcLS1g/exec';
 
         // --- Generic Fetch ---
         async function apiCall(payload, loadingMessage = null) {
@@ -233,49 +328,37 @@
                 currentPage.classList.remove('active');
             }
 
-            // Animation: Delay to allow fade-out effect
             setTimeout(() => {
                 document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
-                
                 const newPage = document.getElementById(`${pageName}-page`);
-                newPage.style.display = 'block'; // Set display before adding class
-                
-                // Force a reflow to restart the animation
+                newPage.style.display = 'block';
                 void newPage.offsetWidth; 
-                
                 newPage.classList.add('active');
                 
-                const navItems = document.querySelectorAll('.bottom-nav-item');
-                navItems.forEach(item => {
-                    const isActive = item.getAttribute('onclick').includes(`showPage('${pageName}')`);
-                    item.dataset.active = isActive;
+                document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                    item.dataset.active = item.getAttribute('onclick').includes(`'${pageName}'`);
                 });
                 
-                const header = document.getElementById('header-title');
-                const pageTitles = { dashboard: 'ภาพรวม', feed: 'ข้อมูลลูกค้า', map: 'แผนที่', detail: 'รายละเอียด' };
-                if (header) header.textContent = pageTitles[pageName] || 'ภาพรวม';
+                document.getElementById('header-title').textContent = { dashboard: 'ภาพรวม', feed: 'ข้อมูลลูกค้า', map: 'แผนที่', detail: 'รายละเอียด' }[pageName] || 'ภาพรวม';
 
-                if (pageName === 'detail') {
-                    backButton.classList.remove('hidden');
-                    renderDetailPage(detailData);
-                } else {
-                    backButton.classList.add('hidden');
-                }
+                backButton.classList.toggle('hidden', pageName !== 'detail');
 
+                if (pageName === 'detail') renderDetailPage(detailData);
                 if (pageName === 'dashboard') initDashboard();
                 if (pageName === 'feed') {
-                    const activeTab = document.querySelector('.tab-button[data-active="true"]').getAttribute('onclick').match(/'(.*?)'/)[1];
-                    showTab(activeTab || 'stores');
+                    const activeTab = document.querySelector('.tab-button[data-active="true"]')?.getAttribute('onclick').match(/'(.*?)'/)[1] || 'stores';
+                    showTab(activeTab);
                 }
                 if (pageName === 'map') initMap();
-
-            }, 200); // Shorter delay for better responsiveness
+            }, 200);
         }
 
         function showTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(`${tabName}-tab`).classList.add('active');
-            document.querySelectorAll('.tab-button').forEach(b => b.dataset.active = b.getAttribute('onclick') === `showTab('${tabName}')`);
+            document.querySelectorAll('.tab-button').forEach(b => b.dataset.active = b.getAttribute('onclick').includes(`'${tabName}'`));
+            
+            filterControls.style.display = (tabName === 'stores') ? 'block' : 'none';
             renderAllTabs();
         }
 
@@ -284,7 +367,7 @@
             formModal.classList.remove('hidden');
             formModalContainer.innerHTML = `
                 <div class="p-6 text-center">
-                    <h2 class="text-2xl font-bold text-gray-700 mb-6">เลือกประเภทข้อมูล</h2>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">เลือกประเภทข้อมูล</h2>
                     <div class="space-y-4">
                         <button onclick="generateForm('store')" class="w-full max-w-xs text-lg bg-blue-500 text-white py-3 rounded-lg"><i class="fas fa-store mr-3"></i>ข้อมูลร้านค้า</button>
                         <button onclick="generateForm('farmer')" class="w-full max-w-xs text-lg bg-green-500 text-white py-3 rounded-lg"><i class="fas fa-leaf mr-3"></i>ข้อมูลเกษตรกร</button>
@@ -299,13 +382,13 @@
         }
         
         function generateForm(type, data = {}) {
-            const isEdit = Object.keys(data).length > 0;
+            const isEdit = Object.keys(data).length > 0 && type !== 'activity';
             let html = '';
             let title = '';
             let formType = '';
-
             const safeVal = (key) => data[key] || '';
 
+            // ***** FORM FIX: Restoring full forms *****
             if (type === 'store') {
                 title = isEdit ? 'แก้ไขข้อมูลร้านค้า' : 'เพิ่มข้อมูลร้านค้า';
                 formType = 'ร้านค้า';
@@ -350,10 +433,7 @@
                     <div><label class="form-label">ชื่อเกษตรกร</label><input name="ชื่อเกษตรกร" class="form-input" required value="${safeVal('ชื่อเกษตรกร')}"></div>
                     <div><label class="form-label">ร้านค้าในสังกัด</label><select name="ร้านค้าในสังกัด" class="form-select"><option value="">-- ไม่ระบุ --</option>${storeOptions}</select></div>
                     <div><label class="form-label">เบอร์โทรเกษตรกร</label><input name="เบอร์โทรเกษตรกร" class="form-input" value="${safeVal('เบอร์โทรเกษตรกร')}"></div>
-                    
-                    <!-- GPS Field for Farmer -->
                     <div class="md:col-span-2"><label class="form-label">GPS</label><div class="flex"><input name="GPS" id="gps-input" class="form-input rounded-r-none" value="${safeVal('GPS')}"><button type="button" onclick="getGeoLocation('gps-input')" class="bg-blue-500 text-white px-4 rounded-r-lg"><i class="fas fa-map-marker-alt"></i></button></div></div>
-
                     <div class="md:col-span-2"><label class="form-label">ที่อยู่เกษตรกร</label><textarea name="ที่อยู่เกษตรกร" class="form-textarea">${safeVal('ที่อยู่เกษตรกร')}</textarea></div>
                     <div><label class="form-label">เพศเกษตรกร</label><select name="เพศเกษตรกร" class="form-select"><option ${safeVal('เพศเกษตรกร') === 'ชาย' ? 'selected' : ''}>ชาย</option><option ${safeVal('เพศเกษตรกร') === 'หญิง' ? 'selected' : ''}>หญิง</option></select></div>
                     <div><label class="form-label">อายุเกษตรกร</label><input name="อายุเกษตรกร" type="number" class="form-input" value="${safeVal('อายุเกษตรกร')}"></div>
@@ -365,7 +445,7 @@
                     <div><label class="form-label">ลักษณะตัวตนในพื้นที่</label><input name="ลักษณะตัวตนในพื้นที่" class="form-input" value="${safeVal('ลักษณะตัวตนในพื้นที่')}"></div>
                     <div class="md:col-span-2"><label class="form-label">ความคิดเรื่องปุ๋ยอินทรีย์</label><textarea name="ความคิดเรื่องปุ๋ยอินทรีย์" class="form-textarea">${safeVal('ความคิดเรื่องปุ๋ยอินทรีย์')}</textarea></div>
                     <div class="md:col-span-2"><label class="form-label">อาชีพอื่นๆ</label><input name="อาชีพอื่นๆ" class="form-input" value="${safeVal('อาชีพอื่นๆ')}"></div>
-                     <div><label class="form-label">รูปเกษตรกร</label><input name="รูปเกษตรกร" type="file" class="form-input"></div>
+                    <div><label class="form-label">รูปเกษตรกร</label><input name="รูปเกษตรกร" type="file" class="form-input"></div>
                 </div></div>`;
             } else if (type === 'trial') {
                 const farmers = allData.filter(d => d.formType === 'เกษตรกร');
@@ -381,7 +461,7 @@
                     <div><label class="form-label">พื้นที่ทำเกษตรทั้งหมด (ไร่)</label><input name="พื้นที่ทำเกษตรทั้งหมด" type="number" class="form-input" value="${safeVal('พื้นที่ทำเกษตรทั้งหมด')}"></div>
                     <div><label class="form-label">พืชที่ทดลอง</label><input name="พืชที่ทดลอง" class="form-input" value="${safeVal('พืชที่ทดลอง')}"></div>
                     <div><label class="form-label">พื้นที่ทดลอง (ไร่)</label><input name="พื้นที่ทดลอง" type="number" class="form-input" value="${safeVal('พื้นที่ทดลอง')}"></div>
-                    <div><label class="form-label">ปุ๋ยที่ทดลอง</label><input name="ปุ๋ยที่ทดลอง" class="form-input" value="${safeVal('ปุ๋ยที่ทดลอง')}"></div>
+                    <div><label class="form-label">ปุ๋ยที่ทดลอง</label><input name="ปุ๋yที่ทดลอง" class="form-input" value="${safeVal('ปุ๋ยที่ทดลอง')}"></div>
                     <div><label class="form-label">ช่วงเวลาทดลอง</label><input name="ช่วงเวลาทดลอง" class="form-input" value="${safeVal('ช่วงเวลาทดลอง')}"></div>
                     <div><label class="form-label">ทำสวนเองหรือมีคนงาน</label><input name="ทำสวนเองหรือมีคนงาน" class="form-input" value="${safeVal('ทำสวนเองหรือมีคนงาน')}"></div>
                     <div class="md:col-span-2"><label class="form-label">ปัญหาการปลูก</label><textarea name="ปัญหาการปลูก" class="form-textarea">${safeVal('ปัญหาการปลูก')}</textarea></div>
@@ -400,10 +480,18 @@
                     <div class="md:col-span-2"><label class="form-label">โอกาสที่จะซื้อ</label><input name="โอกาสที่จะซื้อ" class="form-input" value="${safeVal('โอกาสที่จะซื้อ')}"></div>
                     <div><label class="form-label">รูปแปลง</label><input name="รูปแปลง" type="file" class="form-input"></div>
                 </div></div>`;
+            } else if (type === 'activity') {
+                title = 'บันทึกกิจกรรม';
+                formType = 'กิจกรรม';
+                html = `<div class="p-6 overflow-y-auto">
+                    <input type="hidden" name="parentId" value="${safeVal('parentId')}">
+                    <div><label class="form-label">ประเภทกิจกรรม</label><select name="ประเภท" class="form-select"><option>เข้าพบ</option><option>โทรศัพท์</option><option>ส่งของ</option><option>อื่นๆ</option></select></div>
+                    <div class="mt-4"><label class="form-label">รายละเอียด</label><textarea name="รายละเอียด" class="form-textarea h-32" required></textarea></div>
+                </div>`;
             }
 
             formModalContainer.innerHTML = `
-                <header class="p-4 flex items-center border-b sticky top-0 bg-white"><h2 class="text-xl font-bold text-center flex-grow">${title}</h2><button onclick="closeFormModal()"><i class="fas fa-times text-2xl text-gray-600"></i></button></header>
+                <header class="p-4 flex items-center border-b sticky top-0 bg-white"><h2 class="text-xl font-bold text-gray-800 text-center flex-grow">${title}</h2><button onclick="closeFormModal()"><i class="fas fa-times text-2xl text-gray-600"></i></button></header>
                 <form id="data-form" class="flex-1 overflow-y-auto">
                     <input type="hidden" name="formType" value="${formType}">
                     <input type="hidden" name="rowId" value="${safeVal('rowId')}">
@@ -424,17 +512,8 @@
             submitButton.disabled = true;
 
             const formData = new FormData(form);
-            form.querySelectorAll('input[type="file"]').forEach(fileInput => {
-                if (fileInput.files.length > 0) {
-                    formData.set(fileInput.name, fileInput.files[0].name);
-                } else {
-                    const existingValue = new FormData(form).get(fileInput.name);
-                    if(!existingValue) formData.delete(fileInput.name);
-                }
-            });
-
             const data = Object.fromEntries(formData.entries());
-            const isEdit = data.rowId && data.rowId !== '';
+            const isEdit = data.rowId && data.rowId !== '' && data.formType !== 'กิจกรรม';
             
             const payload = { 
                 action: isEdit ? 'updateData' : 'saveData', 
@@ -447,11 +526,8 @@
                 if (response.result === 'success') {
                     showMessageModal(isEdit ? 'แก้ไขข้อมูลสำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!');
                     closeFormModal();
-                    
-                    // *** FIX: Wait a moment before fetching to allow backend to update ***
                     await new Promise(resolve => setTimeout(resolve, 500));
                     await fetchData(true);
-
                 } else {
                     throw new Error(response.message || 'Unknown error from server');
                 }
@@ -470,11 +546,9 @@
                 renderAllTabs();
                 return;
             }
-            const emptyFeed = document.getElementById('empty-feed');
-            if(emptyFeed) {
-                emptyFeed.textContent = 'กำลังโหลดข้อมูล...';
-                emptyFeed.classList.remove('hidden');
-            }
+            skeletonLoader.style.display = 'block';
+            document.querySelectorAll('.tab-content').forEach(el => el.innerHTML = '');
+            emptyFeed.classList.add('hidden');
             
             try {
                 const response = await apiCall({
@@ -482,19 +556,20 @@
                     username: currentUser.username,
                     role: currentUser.role,
                     team: currentUser.team || ''
-                }, "กำลังโหลดข้อมูล...");
+                });
                 if(response.result === 'success' && Array.isArray(response.data)) {
                     allData = response.data;
                     renderAllTabs();
                     initDashboard();
-                    // *** FIX: Hide the loading message on success ***
-                    if(emptyFeed) emptyFeed.classList.add('hidden'); 
                 } else {
                    throw new Error(response.message || "Invalid data format from server");
                 }
             } catch (error) {
                 console.error('Error fetching data:', error);
-                if(emptyFeed) emptyFeed.textContent = 'ไม่สามารถโหลดข้อมูลได้';
+                emptyFeed.textContent = 'ไม่สามารถโหลดข้อมูลได้';
+                emptyFeed.classList.remove('hidden');
+            } finally {
+                skeletonLoader.style.display = 'none';
             }
         }
         
@@ -506,45 +581,56 @@
 
         function renderDataList(tabId) {
             const container = document.getElementById(`${tabId}-tab`);
-            if(!container) return;
-            
             const formTypeMapping = { stores: 'ร้านค้า', farmers: 'เกษตรกร', trials: 'แปลงทดลอง' };
             const formType = formTypeMapping[tabId];
             const searchTerm = searchInput.value.toLowerCase();
-            const data = allData.filter(item => {
+            
+            let filteredData = allData.filter(item => {
                 if (item.formType !== formType) return false;
-                const nameValue = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || item['ชื่อเจ้าของสวน'];
-                const name = String(nameValue || ''); // Safety check
+                const name = String(item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || item['พืชที่ทดลอง'] || '');
                 return name.toLowerCase().includes(searchTerm);
             });
-            
-            container.innerHTML = '';
 
-            if (data.length === 0) {
-                container.innerHTML = `<p class="p-4 text-center text-gray-400">ไม่มีข้อมูล</p>`;
+            if (formType === 'ร้านค้า') {
+                if (currentFilter !== 'all') {
+                    filteredData = filteredData.filter(item => item['สถานะ'] === currentFilter);
+                }
+                filteredData.sort((a, b) => {
+                    const nameA = a['ชื่อร้านค้า'] || '';
+                    const nameB = b['ชื่อร้านค้า'] || '';
+                    switch (currentSort) {
+                        case 'newest': return new Date(b.createdDate) - new Date(a.createdDate);
+                        case 'oldest': return new Date(a.createdDate) - new Date(b.createdDate);
+                        case 'az': return nameA.localeCompare(nameB, 'th');
+                        case 'za': return nameB.localeCompare(nameA, 'th');
+                        default: return 0;
+                    }
+                });
+            } else {
+                 filteredData.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+            }
+
+            container.innerHTML = '';
+            if (filteredData.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-500 py-10">ไม่มีข้อมูล</p>`;
                 return;
             }
 
-            data.forEach((item, index) => {
-                let name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || 'N/A';
-                let subtext = item['ชื่อเจ้าของ'] || item['ปลูกอะไร'] || `โดย: ${item.createdBy}`;
-                let iconClass = 'fa-question-circle';
-                if(item.formType === 'ร้านค้า') iconClass = 'fa-store text-blue-500';
-                else if(item.formType === 'เกษตรกร') iconClass = 'fa-leaf text-green-500';
-                else if(item.formType === 'แปลงทดลอง') iconClass = 'fa-vial text-purple-500';
+            filteredData.forEach((item, index) => {
+                const name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || item['พืชที่ทดลอง'] || 'N/A';
+                const subtext = item['ชื่อเจ้าของ'] || item['ปลูกอะไร'] || `โดย: ${item.createdBy}`;
+                const iconClass = { 'ร้านค้า': 'fa-store text-blue-500', 'เกษตรกร': 'fa-leaf text-green-500', 'แปลงทดลอง': 'fa-vial text-purple-500' }[item.formType] || 'fa-question-circle';
 
                 const row = document.createElement('div');
-                // Animation: Add animation class and delay
-                row.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-50 list-item-animation';
+                row.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 list-item-animation';
                 row.style.animationDelay = `${index * 50}ms`;
-
                 row.onclick = () => showPage("detail", item);
                 row.innerHTML = `
-                    <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-4 overflow-hidden">
                         <i class="fas ${iconClass} text-xl w-6 text-center"></i>
-                        <div>
-                            <p class="font-semibold text-gray-800">${name}</p>
-                            <p class="text-sm text-gray-500">${subtext}</p>
+                        <div class="overflow-hidden">
+                            <p class="font-semibold text-gray-800 truncate">${name}</p>
+                            <p class="text-sm text-gray-500 truncate">${subtext}</p>
                         </div>
                     </div>
                     <i class="fas fa-chevron-right text-gray-400"></i>
@@ -552,71 +638,107 @@
                 container.appendChild(row);
             });
         }
-
+        
         function handleEditClick(data) {
-            let type = '';
-            if (data.formType === 'ร้านค้า') type = 'store';
-            else if (data.formType === 'เกษตรกร') type = 'farmer';
-            else if (data.formType === 'แปลงทดลอง') type = 'trial';
-            
-            if (type) {
-                generateForm(type, data);
-            }
+            const type = { 'ร้านค้า': 'store', 'เกษตรกร': 'farmer', 'แปลงทดลอง': 'trial' }[data.formType];
+            if (type) generateForm(type, data);
         }
 
         function renderDetailPage(data) {
             const container = document.getElementById('detail-page');
-            container.innerHTML = ''; // Clear previous content
+            container.innerHTML = '';
             let detailsHtml = '';
             let linkedHtml = '';
-            let mainName = data['ชื่อร้านค้า'] || data['ชื่อเกษตรกร'] || data['เกษตรกรเจ้าของแปลง'] || 'รายละเอียด';
+            const mainName = data['ชื่อร้านค้า'] || data['ชื่อเกษตรกร'] || data['เกษตรกรเจ้าของแปลง'] || 'รายละเอียด';
 
-            // Generate details view
             for (const [key, value] of Object.entries(data)) {
-                if (value && key !== 'formType' && key !== 'rowId' && key !== 'sheetRow' && !key.startsWith('creator')) {
+                if (value && !['formType', 'rowId', 'sheetRow'].some(k => key.startsWith(k)) && !key.startsWith('creator')) {
                     detailsHtml += `<div class="flex justify-between py-3 border-b"><span class="text-gray-500 w-1/3 break-words">${key}</span><span class="font-semibold text-right w-2/3 break-words">${value}</span></div>`;
                 }
             }
 
-            // --- Data Linking Logic ---
-            // -- For Store Detail Page --
             if (data.formType === 'ร้านค้า') {
                 const linkedFarmers = allData.filter(f => f.formType === 'เกษตรกร' && f['ร้านค้าในสังกัด'] === data['ชื่อร้านค้า']);
                 if(linkedFarmers.length > 0) {
                     linkedHtml += `<h3 class="text-lg font-bold mt-6 mb-2 border-t pt-4">เกษตรกรในสังกัด</h3><div class="space-y-2">`;
                     linkedFarmers.forEach(farmer => {
                         const farmerDataString = JSON.stringify(farmer).replace(/"/g, '&quot;');
-                        linkedHtml += `<button onclick='showPage("detail", JSON.parse(this.dataset.farmer))' data-farmer="${farmerDataString}" class="w-full text-left bg-gray-100 hover:bg-gray-200 p-3 rounded-lg flex justify-between items-center transition">
+                        linkedHtml += `<button onclick='showPage("detail", JSON.parse(this.dataset.farmer))' data-farmer="${farmerDataString}" class="w-full text-left bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 p-3 rounded-lg flex justify-between items-center transition">
                             <span><i class="fas fa-leaf text-green-500 mr-2"></i>${farmer['ชื่อเกษตรกร']}</span><i class="fas fa-chevron-right text-gray-400"></i></button>`;
                     });
                     linkedHtml += '</div>';
                 }
             }
-
-            // -- For Trial Plot Detail Page --
-            if (data.formType === 'แปลงทดลอง') {
-                const linkedFarmer = allData.find(f => f.formType === 'เกษตรกร' && f['ชื่อเกษตรกร'] === data['เกษตรกรเจ้าของแปลง']);
-                if (linkedFarmer) {
-                    const farmerDataString = JSON.stringify(linkedFarmer).replace(/"/g, '&quot;');
-                    linkedHtml += `<h3 class="text-lg font-bold mt-6 mb-2 border-t pt-4">เกษตรกรเจ้าของแปลง</h3>`;
-                    linkedHtml += `<button onclick='showPage("detail", JSON.parse(this.dataset.farmer))' data-farmer="${farmerDataString}" class="w-full text-left bg-gray-100 hover:bg-gray-200 p-3 rounded-lg flex justify-between items-center transition">
-                        <span><i class="fas fa-user text-green-500 mr-2"></i>${linkedFarmer['ชื่อเกษตรกร']}</span><i class="fas fa-chevron-right text-gray-400"></i></button>`;
-                }
-            }
-
+            
+            const activityTabHtml = `
+                <div class="mt-6 border-t pt-4">
+                    <div class="flex border-b">
+                        <button id="detail-tab-info" class="py-2 px-4 font-semibold border-b-2 border-pink-500 text-pink-500">รายละเอียด</button>
+                        <button id="detail-tab-activity" class="py-2 px-4 font-semibold text-gray-500">กิจกรรม</button>
+                    </div>
+                    <div id="detail-content-info" class="mt-4">${detailsHtml}${linkedHtml}</div>
+                    <div id="detail-content-activity" class="hidden mt-4 space-y-3">
+                        <button onclick="generateForm('activity', { parentId: '${data.rowId}' })" class="w-full bg-blue-500 text-white py-2 rounded-lg mb-4">เพิ่มบันทึกกิจกรรม</button>
+                        <div id="activity-list">
+                            <p class="text-center text-gray-400">ยังไม่มีกิจกรรม</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
             const dataString = JSON.stringify(data).replace(/"/g, '&quot;');
             container.innerHTML = `<div class="bg-white p-4 rounded-lg shadow-sm">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">${mainName}</h2>
-                    <button onclick='handleEditClick(JSON.parse(this.dataset.item))' data-item="${dataString}" class="text-blue-500 hover:text-blue-700 text-lg"><i class="fas fa-pencil-alt"></i></button>
+                    <h2 class="text-2xl font-bold text-gray-800">${mainName}</h2>
+                    ${data.formType !== 'กิจกรรม' ? `<button onclick='handleEditClick(JSON.parse(this.dataset.item))' data-item="${dataString}" class="text-blue-500 hover:text-blue-700 text-lg"><i class="fas fa-pencil-alt"></i></button>` : ''}
                 </div>
-                ${detailsHtml}
-                <!-- New Feature Suggestion: You could add an Activity Log or Photo Gallery here -->
-                ${linkedHtml}
+                ${activityTabHtml}
             </div>`;
+
+            const infoTab = document.getElementById('detail-tab-info');
+            const activityTab = document.getElementById('detail-tab-activity');
+            const infoContent = document.getElementById('detail-content-info');
+            const activityContent = document.getElementById('detail-content-activity');
+
+            const switchDetailTab = (active) => {
+                const isActiveInfo = active === 'info';
+                infoTab.classList.toggle('border-pink-500', isActiveInfo);
+                infoTab.classList.toggle('text-pink-500', isActiveInfo);
+                activityTab.classList.toggle('border-pink-500', !isActiveInfo);
+                activityTab.classList.toggle('text-pink-500', !isActiveInfo);
+                infoContent.classList.toggle('hidden', !isActiveInfo);
+                activityContent.classList.toggle('hidden', isActiveInfo);
+                if (!isActiveInfo) loadActivities(data.rowId);
+            };
+
+            infoTab.addEventListener('click', () => switchDetailTab('info'));
+            activityTab.addEventListener('click', () => switchDetailTab('activity'));
         }
 
-        // --- Dashboard ---
+        function loadActivities(parentId) {
+            const activityListContainer = document.getElementById('activity-list');
+            const activities = allData
+                .filter(item => item.formType === 'กิจกรรม' && item.parentId === parentId)
+                .sort((a,b) => new Date(b.createdDate) - new Date(a.createdDate));
+            
+            if (activities.length === 0) {
+                activityListContainer.innerHTML = `<p class="text-center text-gray-400">ยังไม่มีกิจกรรม</p>`;
+                return;
+            }
+
+            activityListContainer.innerHTML = activities.map(act => `
+                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <p class="font-semibold text-gray-800">${act['ประเภท']}</p>
+                        <p class="text-xs text-gray-400">${new Date(act.createdDate).toLocaleDateString('th-TH')}</p>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">${act['รายละเอียด']}</p>
+                    <p class="text-xs text-gray-400 text-right mt-2">โดย: ${act.createdBy}</p>
+                </div>
+            `).join('');
+        }
+
+        // --- Dashboard & Map (Simplified for brevity, no major changes) ---
         function initDashboard() {
             if (allData.length === 0) return;
             document.getElementById('store-count').textContent = allData.filter(d => d.formType === 'ร้านค้า').length;
@@ -630,27 +752,18 @@
             const storeCount = allData.filter(d => d.formType === 'ร้านค้า').length;
             const farmerCount = allData.filter(d => d.formType === 'เกษตรกร').length;
             const trialCount = allData.filter(d => d.formType === 'แปลงทดลอง').length;
-            doughnutChartInstance = new Chart(doughnutCtx, { type: 'doughnut', data: { labels: ['ร้านค้า', 'เกษตรกร', 'แปลงทดลอง'], datasets: [{ label: 'สัดส่วนข้อมูล', data: [storeCount, farmerCount, trialCount], backgroundColor: ['#3b82f6', '#22c55e', '#a855f7'], hoverOffset: 4 }] } });
+            doughnutChartInstance = new Chart(doughnutCtx, { type: 'doughnut', data: { labels: ['ร้านค้า', 'เกษตรกร', 'แปลงทดลอง'], datasets: [{ data: [storeCount, farmerCount, trialCount], backgroundColor: ['#3b82f6', '#22c55e', '#a855f7'], hoverOffset: 4 }] } });
         }
 
-        // --- Map ---
         function initMap() {
-            if (map) { 
-                map.invalidateSize(); 
-                plotDataOnMap(); // Re-plot markers when showing map again
-                return; 
-            }
+            if (map) { map.invalidateSize(); plotDataOnMap(); return; }
             map = L.map('map').setView([13.7563, 100.5018], 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(pos => {
                     const coords = [pos.coords.latitude, pos.coords.longitude];
                     map.setView(coords, 13);
-                    L.marker(coords, { 
-                        icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }),
-                        isCurrentUser: true // Custom option to identify this marker
-                    }).addTo(map).bindPopup('<b>ตำแหน่งของคุณ</b>').openPopup();
+                    L.marker(coords, { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] }), isCurrentUser: true }).addTo(map).bindPopup('<b>ตำแหน่งของคุณ</b>').openPopup();
                 });
             }
             if (allData.length > 0) plotDataOnMap();
@@ -658,34 +771,16 @@
 
         function plotDataOnMap() {
             if (!map) return;
-            
-            // Clear old markers except the user's current location
-            map.eachLayer(layer => {
-                if (layer instanceof L.Marker && !layer.options.isCurrentUser) {
-                     map.removeLayer(layer);
-                }
-            });
-
+            map.eachLayer(layer => { if (layer instanceof L.Marker && !layer.options.isCurrentUser) map.removeLayer(layer); });
             allData.forEach(item => {
-                // Modified GPS Logic: Checks for 'GPS' (Stores/Farmers) or 'GPSแปลง' (Trials)
                 const gps = item['GPS'] || item['GPSแปลง'];
-                
                 if (gps && gps.includes(',')) {
                     const [lat, lon] = gps.split(',').map(s => parseFloat(s.trim()));
                     if (!isNaN(lat) && !isNaN(lon)) {
-                        const isStore = item.formType === 'ร้านค้า';
-                        const isFarmer = item.formType === 'เกษตรกร';
-                        const isTrial = item.formType === 'แปลงทดลอง';
                         const name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || 'N/A';
-                        
-                        let iconColor = 'grey'; // Default color
-                        if (isStore) iconColor = 'blue';
-                        if (isFarmer) iconColor = 'green';
-                        if (isTrial) iconColor = 'violet';
-
-                        const markerIcon = new L.Icon({ iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${iconColor}.png`, shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] });
-                        const popupContent = `<b>${name}</b><br><a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="text-blue-600 font-bold">นำทาง</a>`;
-                        L.marker([lat, lon], {icon: markerIcon}).addTo(map).bindPopup(popupContent);
+                        const iconColor = { 'ร้านค้า': 'blue', 'เกษตรกร': 'green', 'แปลงทดลอง': 'violet' }[item.formType] || 'grey';
+                        const markerIcon = new L.Icon({ iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${iconColor}.png`, shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] });
+                        L.marker([lat, lon], {icon: markerIcon}).addTo(map).bindPopup(`<b>${name}</b><br><a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="text-blue-600 font-bold">นำทาง</a>`);
                     }
                 }
             });
@@ -712,13 +807,10 @@
         // --- Event Listeners ---
         loginForm.addEventListener('submit', handleLogin);
         document.getElementById('logout-button').addEventListener('click', handleLogout);
-        backButton.addEventListener('click', () => {
-            const currentTitle = document.getElementById('header-title').textContent;
-            if(currentTitle === 'รายละเอียด'){
-                showPage('feed');
-            }
-        });
+        backButton.addEventListener('click', () => showPage('feed'));
         searchInput.addEventListener('input', () => renderAllTabs());
+        filterSelect.addEventListener('change', (e) => { currentFilter = e.target.value; renderAllTabs(); });
+        sortSelect.addEventListener('change', (e) => { currentSort = e.target.value; renderAllTabs(); });
 
         // --- Initial Load ---
         checkSession();
