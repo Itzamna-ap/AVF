@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -31,8 +32,10 @@
         .form-label { display: block; font-weight: 500; color: #374151; margin-bottom: 0.5rem; }
 
         /* Animation for modal */
-        #form-modal.hidden { opacity: 0; pointer-events: none; }
         #form-modal { transition: opacity 0.3s ease; }
+        #form-modal.hidden { opacity: 0; pointer-events: none; }
+        .form-modal-content { transition: transform 0.3s ease; }
+        #form-modal.hidden .form-modal-content { transform: scale(0.95); }
     </style>
 </head>
 <body class="overscroll-none">
@@ -44,7 +47,7 @@
             <form id="login-form" class="space-y-4">
                 <div><label for="username" class="form-label text-left">ชื่อผู้ใช้</label><input id="username" type="text" class="form-input"></div>
                 <div><label for="password" class="form-label text-left">รหัสผ่าน</label><input id="password" type="password" class="form-input"></div>
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg !mt-6">เข้าสู่ระบบ</button>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg !mt-6 transform active:scale-95 transition-transform">เข้าสู่ระบบ</button>
                 <p id="login-error" class="text-red-500 text-center text-sm pt-2 h-6"></p>
             </form>
         </div>
@@ -87,6 +90,11 @@
                 <div id="map-page" class="page-content"><div id="map" class="h-full w-full rounded-lg shadow-md min-h-[calc(100vh-160px)]"></div></div>
             </main>
 
+            <!-- Floating Action Button -->
+            <button onclick="showAddFormSelection()" class="fixed bottom-20 right-5 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-20 transform active:scale-90 transition-transform">
+                <i class="fas fa-plus text-2xl"></i>
+            </button>
+
             <!-- Bottom Navigation -->
             <nav class="bg-white border-t flex justify-around p-2 fixed bottom-0 w-full z-10">
                 <button onclick="showPage('dashboard')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2 w-1/3" data-active="true"><i class="fas fa-chart-pie text-2xl"></i><span class="text-xs mt-1">ภาพรวม</span></button>
@@ -98,7 +106,7 @@
     
     <!-- Add/Edit Data Modal -->
     <div id="form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-30 flex items-center justify-center p-4">
-        <div id="form-modal-container" class="bg-gray-50 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"></div>
+        <div id="form-modal-container" class="form-modal-content bg-gray-50 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"></div>
     </div>
     
     <!-- Message Modal -->
@@ -134,6 +142,7 @@
         async function apiCall(payload) {
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
+                cache: 'no-cache', // Explicitly tell the browser not to cache this request
                 body: JSON.stringify(payload),
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' }
             });
@@ -173,8 +182,9 @@
         function initializeApp() {
             loginView.classList.remove('active');
             mainAppView.classList.add('active');
-            showPage('dashboard');
-            fetchData(); // Fetch data once on init
+            fetchData().then(() => {
+                showPage('dashboard');
+            });
         }
 
         function handleLogout() {
