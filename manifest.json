@@ -1,34 +1,25 @@
 {
   "short_name": "AF App",
-  "name": "Advance Fertilizer Data App",
+  "name": "Advance Fertilizer",
   "description": "แอปพลิเคชันสำหรับเก็บข้อมูลร้านค้าและเกษตรกร",
   "icons": [
     {
-      "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png",
-      "type": "image/png",
-      "sizes": "48x48"
-    },
-    {
-      "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_96dp.png",
-      "type": "image/png",
-      "sizes": "96x96"
-    },
-    {
-      "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_192dp.png",
+      "src": "https://placehold.co/192x192/22c55e/ffffff?text=AF",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "https://www.gstatic.com/images/branding/product/1x/drive_2020q4_512dp.png",
+      "src": "https://placehold.co/512x512/22c55e/ffffff?text=AF",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f4f5f7",
+  "background_color": "#ffffff",
   "theme_color": "#22c55e"
 }
