@@ -1,32 +1,32 @@
 // Define a name for the cache
-const CACHE_NAME = 'data-app-cache-v2'; // Updated version number
+const CACHE_NAME = 'advance-fertilizer-cache-v1';
 
 // List of files to cache using relative paths for GitHub Pages
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json', // Added manifest to cache
+  './manifest.json',
   'https://cdn.tailwindcss.com',
   'https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
+  'https://cdn.jsdelivr.net/npm/chart.js',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
-  'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png' // Added marker shadow for leaflet
+  'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
 ];
 
-// Install event: opens the cache and adds the files to it
+// Install event: opens the cache and adds the core files to it.
 self.addEventListener('install', event => {
-  // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache');
+        console.log('Opened cache and caching core assets');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-// Fetch event: serves assets from cache if they exist
+// Fetch event: serves assets from cache if they exist, otherwise fetches from network.
 self.addEventListener('fetch', event => {
   // We only want to cache GET requests.
   if (event.request.method !== 'GET') {
@@ -35,25 +35,27 @@ self.addEventListener('fetch', event => {
 
   event.respondWith(
     caches.open(CACHE_NAME).then(cache => {
-      return fetch(event.request).then(networkResponse => {
-        // If we get a valid response, cache it and return it
-        if (networkResponse && networkResponse.status === 200) {
-          // IMPORTANT: Do not cache requests to the Apps Script API
-          if (!event.request.url.includes('script.google.com')) {
-            cache.put(event.request, networkResponse.clone());
-          }
+      return cache.match(event.request).then(response => {
+        // Return response from cache if found.
+        if (response) {
+          return response;
         }
-        return networkResponse;
-      }).catch(() => {
-        // If the network fails, try to get it from the cache
-        return cache.match(event.request);
+
+        // If not in cache, fetch from network.
+        return fetch(event.request).then(networkResponse => {
+          // Optional: Cache the new resource.
+          // IMPORTANT: Do not cache API calls to your Apps Script
+          if (networkResponse.ok && !event.request.url.includes('script.google.com')) {
+             cache.put(event.request, networkResponse.clone());
+          }
+          return networkResponse;
+        });
       });
     })
   );
 });
 
-
-// Activate event: removes old caches
+// Activate event: removes old caches to keep the app updated.
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
