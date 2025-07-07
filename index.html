@@ -43,8 +43,6 @@
         .skeleton { background-color: #e5e7eb; border-radius: 0.5rem; animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         .dark .skeleton { background-color: #374151; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-        .notification-badge { position: absolute; top: -5px; right: -8px; min-width: 20px; height: 20px; border-radius: 10px; background-color: #ef4444; color: white; font-size: 12px; display: flex; align-items: center; justify-content: center; padding: 0 6px; border: 2px solid #fff; }
-        .dark .notification-badge { border-color: #1f2937; }
     </style>
 </head>
 <body class="overscroll-none">
@@ -67,7 +65,6 @@
                 <button id="back-button" class="hidden text-xl text-gray-600 w-8 text-left"><i class="fas fa-chevron-left"></i></button>
                 <h1 id="header-title" class="text-xl font-bold text-gray-800 text-center flex-grow">ภาพรวม</h1>
                 <div class="flex items-center space-x-4">
-                    <button id="notification-bell" class="relative text-xl text-gray-600 w-8"><i class="fas fa-bell"></i><span id="notification-badge" class="hidden notification-badge">0</span></button>
                     <button id="theme-toggle" class="text-xl text-gray-600 w-8"><i class="fas fa-moon"></i></button>
                     <button id="logout-button" class="text-xl text-gray-600 w-8 text-right"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
@@ -129,11 +126,6 @@
         </div>
     </div>
     
-    <div id="notification-panel" class="hidden absolute top-16 right-4 w-80 max-w-[90vw] bg-white rounded-lg shadow-xl border z-30">
-        <div class="p-4 border-b"><h3 class="font-bold text-gray-800">การแจ้งเตือน</h3></div>
-        <div id="notification-list" class="p-2 max-h-80 overflow-y-auto"><p class="text-center text-gray-500 p-4">ไม่มีการแจ้งเตือนใหม่</p></div>
-    </div>
-
     <div id="form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-30 flex items-center justify-center p-4"><div id="form-modal-container" class="form-modal-content bg-gray-50 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"></div></div>
     <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"><div class="bg-white p-6 rounded-lg shadow-xl text-center w-11/12 max-w-sm"><p id="modal-message" class="text-lg"></p><button onclick="closeMessageModal()" class="mt-4 bg-pink-500 text-white px-6 py-2 rounded-md w-full">ตกลง</button></div></div>
     <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex flex-col items-center justify-center text-white"><i class="fas fa-spinner fa-spin text-4xl"></i><p id="loading-text" class="mt-4 text-lg">กำลังโหลดข้อมูล...</p></div>
@@ -169,11 +161,7 @@
         const sortSelect = document.getElementById('sort-select');
         const skeletonLoader = document.getElementById('skeleton-loader');
         const emptyFeed = document.getElementById('empty-feed');
-        const notificationBell = document.getElementById('notification-bell');
-        const notificationBadge = document.getElementById('notification-badge');
-        const notificationPanel = document.getElementById('notification-panel');
-        const notificationList = document.getElementById('notification-list');
-
+        
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWYuttyt5bFw3h7jzUhEaWBpowkLikqILd5kaL0V6b_jveMP1Tdpd1gPGqJmqexcLS1g/exec';
 
         async function apiCall(payload, loadingMessage = null) {
@@ -578,7 +566,6 @@
                 const response = await apiCall({ action: 'getData', username: currentUser.username, role: currentUser.role, team: currentUser.team || '' });
                 if(response.result === 'success' && Array.isArray(response.data)) {
                     allData = response.data;
-                    if (force) { generateNotifications(allData); }
                     renderAllTabs();
                     initDashboard();
                 } else { throw new Error(response.message || "Invalid data format from server"); }
@@ -767,9 +754,8 @@
         searchInput.addEventListener('input', () => renderAllTabs());
         filterSelect.addEventListener('change', (e) => { currentFilter = e.target.value; renderAllTabs(); });
         sortSelect.addEventListener('change', (e) => { currentSort = e.target.value; renderAllTabs(); });
-
+        
         checkSession();
-        updateNotificationUI();
     </script>
 </body>
 </html>
