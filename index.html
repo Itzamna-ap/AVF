@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Advance Fertilizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
@@ -11,39 +12,34 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#22c55e">
+    <meta name="theme-color" content="#ffffff">
     <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
 
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }
-        .view { display: none; }
-        .view.active { display: block; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f4f5f7; }
+        .view { display: none !important; }
+        .view.active { display: block !important; }
+        #login-view.active { display: grid !important; }
+
         .page-content, .tab-content { display: none; }
         .page-content.active, .tab-content.active { display: block; }
 
-        .main-nav-item[data-active=true], .bottom-nav-item[data-active=true], .tab-button[data-active=true] {
-            color: #22c55e;
-            border-color: #22c55e;
-        }
-        .main-nav-item[data-active=true] { background-color: #f0fdf4; font-weight: 700; }
-        .tab-button[data-active=true] { font-weight: 700; }
+        .bottom-nav-item.active { color: #22c55e; }
+        .tab-button.active { color: #22c55e; background-color: #fff; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
         
-        .form-input, .form-select, .form-textarea {
-            width: 100%; background-color: #fff; border: 1px solid #d1d5db;
-            border-radius: 0.5rem; padding: 0.75rem; font-size: 1rem;
-            transition: box-shadow 0.2s, border-color 0.2s;
-        }
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none; border-color: #2563eb;
-            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
-        }
+        .form-input, .form-select, .form-textarea { width: 100%; background-color: #fff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem; font-size: 1rem; transition: box-shadow 0.2s, border-color 0.2s; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4); }
         .form-label { display: block; font-weight: 500; color: #374151; margin-bottom: 0.5rem; }
+
+        /* Animation for modal */
+        #form-modal.hidden { opacity: 0; pointer-events: none; }
+        #form-modal { transition: opacity 0.3s ease; }
     </style>
 </head>
-<body>
+<body class="overscroll-none">
 
     <!-- ===== Login View ===== -->
-    <div id="login-view" class="view active grid place-items-center min-h-screen">
+    <div id="login-view" class="view active place-items-center min-h-screen">
         <div class="w-full max-w-sm p-8 space-y-6">
             <div class="text-center"><i class="fas fa-leaf text-5xl text-green-500"></i><h1 class="text-4xl font-bold text-gray-800 mt-4">Advance Fertilizer</h1><p class="text-gray-500">กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p></div>
             <form id="login-form" class="space-y-4">
@@ -57,53 +53,46 @@
 
     <!-- ===== Main App View ===== -->
     <div id="main-app-view" class="view">
-        <div class="md:flex h-screen">
-            <!-- Sidebar (Desktop) -->
-            <nav class="hidden md:flex flex-col w-64 bg-white border-r p-4 space-y-2">
-                <div class="text-center px-2 mb-4"><i class="fas fa-leaf text-3xl text-green-500"></i><h1 class="text-2xl font-bold text-gray-800 mt-2">Advance Fertilizer</h1></div>
-                <button onclick="showPage('dashboard')" class="main-nav-item w-full flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100" data-active="true"><i class="fas fa-chart-pie w-6 text-center"></i><span>ภาพรวม</span></button>
-                <button onclick="showPage('feed')" class="main-nav-item w-full flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100"><i class="fas fa-users w-6 text-center"></i><span>ข้อมูลลูกค้า</span></button>
-                <button onclick="showPage('map')" class="main-nav-item w-full flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100"><i class="fas fa-map-marked-alt w-6 text-center"></i><span>แผนที่</span></button>
-                <div class="flex-grow"></div>
-                <button id="logout-button-desktop" class="w-full flex items-center space-x-3 p-3 rounded-lg text-gray-600 hover:bg-gray-100"><i class="fas fa-sign-out-alt w-6 text-center"></i><span>ออกจากระบบ</span></button>
-            </nav>
-
+        <div class="flex flex-col h-screen">
+            <!-- Header -->
+            <header class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-10">
+                 <button id="back-button" class="hidden text-xl text-gray-600 w-8 text-left"><i class="fas fa-chevron-left"></i></button>
+                <h1 id="header-title" class="text-xl font-bold text-gray-800 text-center flex-grow">ภาพรวม</h1>
+                <button id="logout-button" class="text-xl text-gray-600 w-8 text-right"><i class="fas fa-sign-out-alt"></i></button>
+            </header>
+            
             <!-- Main Content -->
-            <main class="flex-1 flex flex-col h-screen bg-gray-50">
-                <header class="md:hidden bg-white border-b p-4 flex justify-between items-center"><h1 id="mobile-header-title" class="text-xl font-bold text-gray-800">ภาพรวม</h1><button id="logout-button-mobile"><i class="fas fa-sign-out-alt text-xl text-gray-600"></i></button></header>
-                <div class="flex-1 overflow-y-auto p-4 md:p-6">
-                    <!-- Dashboard Page -->
-                    <div id="dashboard-page" class="page-content active">
-                        <h1 class="text-2xl font-bold text-gray-800 mb-6">ภาพรวม</h1>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
-                            <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4"><i class="fas fa-store text-2xl text-blue-500 bg-blue-100 p-3 rounded-full"></i><div><p class="text-sm text-gray-500">ร้านค้า</p><p id="store-count" class="text-2xl font-bold">0</p></div></div>
-                            <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4"><i class="fas fa-leaf text-2xl text-green-500 bg-green-100 p-3 rounded-full"></i><div><p class="text-sm text-gray-500">เกษตรกร</p><p id="farmer-count" class="text-2xl font-bold">0</p></div></div>
-                            <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4"><i class="fas fa-vial text-2xl text-purple-500 bg-purple-100 p-3 rounded-full"></i><div><p class="text-sm text-gray-500">แปลงทดลอง</p><p id="trial-count" class="text-2xl font-bold">0</p></div></div>
-                            <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4"><i class="fas fa-coins text-2xl text-yellow-500 bg-yellow-100 p-3 rounded-full"></i><div><p class="text-sm text-gray-500">ยอดขายรวม</p><p id="sales-total" class="text-2xl font-bold">0</p></div></div>
-                        </div>
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="bg-white p-4 rounded-lg shadow-sm"><h3 class="font-bold mb-4">ลูกค้าใหม่</h3><canvas id="lineChart"></canvas></div><div class="bg-white p-4 rounded-lg shadow-sm"><h3 class="font-bold mb-4">ประเภทสินค้า</h3><canvas id="barChart"></canvas></div></div>
+            <main class="flex-1 overflow-y-auto p-4 pb-24">
+                <!-- Dashboard Page -->
+                <div id="dashboard-page" class="page-content active">
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">ร้านค้า</p><p id="store-count" class="text-3xl font-bold text-blue-500">0</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">เกษตรกร</p><p id="farmer-count" class="text-3xl font-bold text-green-500">0</p></div>
                     </div>
-                    <!-- Feed Page -->
-                    <div id="feed-page" class="page-content">
-                        <div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold text-gray-800">ข้อมูลลูกค้า</h1><button onclick="showAddFormSelection()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><i class="fas fa-plus"></i><span>เพิ่ม</span></button></div>
-                        <div class="border-b border-gray-200 mb-4"><div class="flex space-x-8"><button onclick="showTab('stores')" class="tab-button py-2 border-b-2" data-active="true">ร้านค้า</button><button onclick="showTab('farmers')" class="tab-button py-2 border-b-2">เกษตรกร</button><button onclick="showTab('trials')" class="tab-button py-2 border-b-2">แปลงทดลอง</button></div></div>
-                        <div id="feed-container">
-                            <div id="stores-tab" class="tab-content active bg-white rounded-lg shadow-sm"></div>
-                            <div id="farmers-tab" class="tab-content bg-white rounded-lg shadow-sm"></div>
-                            <div id="trials-tab" class="tab-content bg-white rounded-lg shadow-sm"></div>
-                        </div>
-                        <p id="empty-feed" class="hidden text-center text-gray-500 py-10">ไม่มีข้อมูลให้แสดง</p>
-                    </div>
-                    <!-- Map Page -->
-                    <div id="map-page" class="page-content"><div id="map" class="h-full w-full rounded-lg shadow-md min-h-[calc(100vh-100px)]"></div></div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm"><h3 class="font-bold mb-2 text-center">สัดส่วนข้อมูล</h3><div class="max-w-xs mx-auto"><canvas id="doughnutChart"></canvas></div></div>
                 </div>
+                <!-- Feed Page (List View) -->
+                <div id="feed-page" class="page-content">
+                    <div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold text-gray-800">ข้อมูลลูกค้า</h1><button onclick="showAddFormSelection()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><i class="fas fa-plus"></i><span>เพิ่ม</span></button></div>
+                    <div class="p-1 bg-gray-200 rounded-lg flex space-x-1 mb-4"><button onclick="showTab('stores')" class="tab-button w-1/2 py-2 rounded-md" data-active="true">ร้านค้า</button><button onclick="showTab('farmers')" class="tab-button w-1/2 py-2 rounded-md">เกษตรกร</button></div>
+                    <div class="relative mb-4"><input id="search-input" type="text" placeholder="ค้นหาด้วยชื่อ..." class="form-input pl-10"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i></div>
+                    <div id="feed-container">
+                        <div id="stores-tab" class="tab-content active space-y-3"></div>
+                        <div id="farmers-tab" class="tab-content space-y-3"></div>
+                    </div>
+                    <p id="empty-feed" class="hidden text-center text-gray-500 py-10">ไม่มีข้อมูล</p>
+                </div>
+                <!-- Detail Page -->
+                <div id="detail-page" class="page-content"></div>
+                <!-- Map Page -->
+                <div id="map-page" class="page-content"><div id="map" class="h-full w-full rounded-lg shadow-md min-h-[calc(100vh-160px)]"></div></div>
             </main>
 
-            <!-- Bottom Navigation (Mobile) -->
-            <nav class="md:hidden bg-white border-t flex justify-around p-2">
-                <button onclick="showPage('dashboard')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2" data-active="true"><i class="fas fa-chart-pie text-2xl"></i><span class="text-xs mt-1">ภาพรวม</span></button>
-                <button onclick="showPage('feed')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2"><i class="fas fa-users text-2xl"></i><span class="text-xs mt-1">ลูกค้า</span></button>
-                <button onclick="showPage('map')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2"><i class="fas fa-map-marked-alt text-2xl"></i><span class="text-xs mt-1">แผนที่</span></button>
+            <!-- Bottom Navigation -->
+            <nav class="bg-white border-t flex justify-around p-2 fixed bottom-0 w-full z-10">
+                <button onclick="showPage('dashboard')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2 w-1/3" data-active="true"><i class="fas fa-chart-pie text-2xl"></i><span class="text-xs mt-1">ภาพรวม</span></button>
+                <button onclick="showPage('feed')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2 w-1/3"><i class="fas fa-users text-2xl"></i><span class="text-xs mt-1">ลูกค้า</span></button>
+                <button onclick="showPage('map')" class="bottom-nav-item flex flex-col items-center text-gray-500 p-2 w-1/3"><i class="fas fa-map-marked-alt text-2xl"></i><span class="text-xs mt-1">แผนที่</span></button>
             </nav>
         </div>
     </div>
@@ -133,23 +122,23 @@
         let currentUser = null;
         let allData = [];
         let map = null;
-        let lineChartInstance = null;
-        let barChartInstance = null;
+        let doughnutChartInstance = null;
         const loginView = document.getElementById('login-view');
         const mainAppView = document.getElementById('main-app-view');
         const formModal = document.getElementById('form-modal');
         const formModalContainer = document.getElementById('form-modal-container');
         const loginForm = document.getElementById('login-form');
+        const backButton = document.getElementById('back-button');
+        const searchInput = document.getElementById('search-input');
 
         // --- Generic Fetch Function ---
         async function apiCall(payload) {
             const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return await response.json();
         }
 
@@ -186,6 +175,7 @@
             loginView.classList.remove('active');
             mainAppView.classList.add('active');
             showPage('dashboard');
+            fetchData(); // Fetch data once on init
         }
 
         function handleLogout() {
@@ -204,27 +194,28 @@
         }
         
         // --- UI Navigation ---
-        function showPage(pageName) {
+        function showPage(pageName, detailData = null) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             document.getElementById(`${pageName}-page`).classList.add('active');
             
-            const navItems = document.querySelectorAll('.main-nav-item, .bottom-nav-item');
+            const navItems = document.querySelectorAll('.bottom-nav-item');
             navItems.forEach(item => {
-                item.dataset.active = item.getAttribute('onclick') === `showPage('${pageName}')`;
+                item.dataset.active = item.getAttribute('onclick').includes(`showPage('${pageName}')`);
             });
             
-            const mobileHeader = document.getElementById('mobile-header-title');
-            const pageTitles = { dashboard: 'ภาพรวม', feed: 'ข้อมูลลูกค้า', map: 'แผนที่' };
-            if (mobileHeader) mobileHeader.textContent = pageTitles[pageName] || 'ภาพรวม';
+            const header = document.getElementById('header-title');
+            const pageTitles = { dashboard: 'ภาพรวม', feed: 'ข้อมูลลูกค้า', map: 'แผนที่', detail: 'รายละเอียด' };
+            if (header) header.textContent = pageTitles[pageName] || 'ภาพรวม';
+
+            if (pageName === 'detail') {
+                backButton.classList.remove('hidden');
+                renderDetailPage(detailData);
+            } else {
+                backButton.classList.add('hidden');
+            }
 
             if (pageName === 'dashboard') initDashboard();
-            if (pageName === 'feed') {
-                if (allData.length === 0) {
-                    fetchData().then(() => showTab('stores'));
-                } else {
-                    showTab('stores');
-                }
-            }
+            if (pageName === 'feed') showTab('stores');
             if (pageName === 'map') initMap();
         }
 
@@ -232,6 +223,7 @@
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(`${tabName}-tab`).classList.add('active');
             document.querySelectorAll('.tab-button').forEach(b => b.dataset.active = b.getAttribute('onclick') === `showTab('${tabName}')`);
+            renderAllTabs(); // Re-render lists when tab changes
         }
 
         // --- Add/Edit Data Modal & Form Generation ---
@@ -270,16 +262,88 @@
                     <div class="md:col-span-2"><label class="form-label">GPS</label><div class="flex"><input name="gps" id="gps-input" class="form-input rounded-r-none" value="${safeVal('gps')}"><button type="button" onclick="getGeoLocation('gps-input')" class="bg-blue-500 text-white px-4 rounded-r-lg"><i class="fas fa-map-marker-alt"></i></button></div></div>
                     <div><label class="form-label">ขนาดร้านค้า</label><input name="storeSize" class="form-input" value="${safeVal('storeSize')}"></div>
                     <div><label class="form-label">เปิดมากี่ปี</label><input name="yearsOpen" type="number" class="form-input" value="${safeVal('yearsOpen')}"></div>
+                    <div><label class="form-label">สินค้าหลัก</label><input name="mainProducts" class="form-input" value="${safeVal('mainProducts')}"></div>
+                    <div><label class="form-label">ยอดปุ๋ย/ปี</label><input name="fertilizerSalesPerYear" class="form-input" value="${safeVal('fertilizerSalesPerYear')}"></div>
+                    <div><label class="form-label">การจ่ายเงิน</label><input name="paymentMethod" class="form-input" value="${safeVal('paymentMethod')}"></div>
+                    <div><label class="form-label">พืชหลักในพื้นที่</label><input name="mainCropsInArea" class="form-input" value="${safeVal('mainCropsInArea')}"></div>
+                    <div><label class="form-label">พื้นที่ขายของร้าน</label><input name="salesFloorArea" class="form-input" value="${safeVal('salesFloorArea')}"></div>
+                    <div><label class="form-label">ลักษณะการขาย</label><input name="salesStyle" class="form-input" value="${safeVal('salesStyle')}"></div>
+                    <div><label class="form-label">มีร้านซาปัวหรือไม่</label><select name="hasSubDealer" class="form-select"><option ${safeVal('hasSubDealer') === 'มี' ? 'selected' : ''}>มี</option><option ${safeVal('hasSubDealer') === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option></select></div>
+                    <div><label class="form-label">มีแบรนด์ของตัวเองหรือไม่</label><select name="hasOwnBrand" class="form-select"><option ${safeVal('hasOwnBrand') === 'มี' ? 'selected' : ''}>มี</option><option ${safeVal('hasOwnBrand') === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option></select></div>
+                    <div><label class="form-label">ลักษณะของร้าน</label><input name="storeOwnership" class="form-input" value="${safeVal('storeOwnership')}"></div>
+                    <div><label class="form-label">รูปร้าน</label><input name="storeImage" type="file" class="form-input"></div>
+                </div>
+                <h3 class="text-xl font-bold mt-8 mb-6 border-b pb-4">พฤติกรรมเจ้าของร้าน</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="form-label">ชื่อ-สกุล เจ้าของ</label><input name="ownerName" class="form-input" value="${safeVal('ownerName')}"></div>
+                    <div><label class="form-label">เบอร์โทร</label><input name="ownerPhone" class="form-input" value="${safeVal('ownerPhone')}"></div>
+                    <div><label class="form-label">เพศ</label><select name="ownerGender" class="form-select"><option ${safeVal('ownerGender') === 'ชาย' ? 'selected' : ''}>ชาย</option><option ${safeVal('ownerGender') === 'หญิง' ? 'selected' : ''}>หญิง</option></select></div>
+                    <div><label class="form-label">อายุ</label><input name="ownerAge" type="number" class="form-input" value="${safeVal('ownerAge')}"></div>
+                    <div><label class="form-label">สถานะ</label><input name="ownerMaritalStatus" class="form-input" value="${safeVal('ownerMaritalStatus')}"></div>
+                    <div><label class="form-label">รุ่นที่เท่าไรของร้าน</label><input name="ownerGeneration" type="number" class="form-input" value="${safeVal('ownerGeneration')}"></div>
+                    <div><label class="form-label">ชอบสังสรรค์</label><select name="ownerSocializes" class="form-select"><option ${safeVal('ownerSocializes') === 'ชอบ' ? 'selected' : ''}>ชอบ</option><option ${safeVal('ownerSocializes') === 'ไม่ชอบ' ? 'selected' : ''}>ไม่ชอบ</option></select></div>
+                    <div><label class="form-label">งานอดิเรก</label><input name="ownerHobby" class="form-input" value="${safeVal('ownerHobby')}"></div>
+                    <div><label class="form-label">กีฬาที่ชอบ</label><input name="ownerSport" class="form-input" value="${safeVal('ownerSport')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">เป็นคนประเภทใด</label><select name="ownerPersonality" class="form-select"><option ${safeVal('ownerPersonality') === 'ชอบเจ๊าะแจ๊ะ' ? 'selected' : ''}>ชอบเจ๊าะแจ๊ะ</option><option ${safeVal('ownerPersonality') === 'ชอบข้อมูล' ? 'selected' : ''}>ชอบข้อมูล</option><option ${safeVal('ownerPersonality') === 'ชอบทดลอง' ? 'selected' : ''}>ชอบทดลอง</option><option ${safeVal('ownerPersonality') === 'ชอบต่อราคา' ? 'selected' : ''}>ชอบต่อราคา</option></select></div>
+                    <div class="md:col-span-2"><label class="form-label">แนวคิดการตลาดปุ๋ย</label><textarea name="fertilizerMarketingConcept" class="form-textarea h-24">${safeVal('fertilizerMarketingConcept')}</textarea></div>
+                    <div><label class="form-label">รูปเจ้าของร้าน</label><input name="ownerImage" type="file" class="form-input"></div>
                 </div></div>`;
             } else if (type === 'farmer') {
+                const stores = allData.filter(d => d.formType === 'ร้านค้า');
+                const storeOptions = stores.map(s => `<option value="${s.storeName}" ${safeVal('linkedStoreName') === s.storeName ? 'selected' : ''}>${s.storeName}</option>`).join('');
                 title = isEdit ? 'แก้ไขข้อมูลเกษตรกร' : 'เพิ่มข้อมูลเกษตรกร';
                 formType = 'เกษตรกร';
                 html = `<div class="p-6 overflow-y-auto"><h3 class="text-xl font-bold mb-6 border-b pb-4">ข้อมูลเกษตรกร</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div><label class="form-label">ชื่อ-สกุล</label><input name="farmerName" class="form-input" required value="${safeVal('farmerName')}"></div>
+                    <div><label class="form-label">ร้านค้าในสังกัด</label><select name="linkedStoreName" class="form-select"><option value="">-- ไม่ระบุ --</option>${storeOptions}</select></div>
                     <div><label class="form-label">เบอร์โทร</label><input name="farmerPhone" class="form-input" value="${safeVal('farmerPhone')}"></div>
                     <div class="md:col-span-2"><label class="form-label">ที่อยู่</label><textarea name="farmerAddress" class="form-textarea">${safeVal('farmerAddress')}</textarea></div>
+                    <div><label class="form-label">เพศ</label><select name="farmerGender" class="form-select"><option ${safeVal('farmerGender') === 'ชาย' ? 'selected' : ''}>ชาย</option><option ${safeVal('farmerGender') === 'หญิง' ? 'selected' : ''}>หญิง</option></select></div>
+                    <div><label class="form-label">อายุ</label><input name="farmerAge" type="number" class="form-input" value="${safeVal('farmerAge')}"></div>
+                    <div><label class="form-label">ปลูกอะไร</label><input name="cropsGrown" class="form-input" value="${safeVal('cropsGrown')}"></div>
+                    <div><label class="form-label">ปลูกกี่ไร่</label><input name="farmArea" type="number" class="form-input" value="${safeVal('farmArea')}"></div>
+                    <div><label class="form-label">ใช้ปุ๋ยประเภทไหน</label><input name="fertilizerTypeUsed" class="form-input" value="${safeVal('fertilizerTypeUsed')}"></div>
+                    <div><label class="form-label">ใช้ปุ๋ยปีละกี่ครั้ง/ครั้งละเท่าไร</label><input name="fertilizerApplication" class="form-input" value="${safeVal('fertilizerApplication')}"></div>
+                    <div><label class="form-label">ใช้ปุ๋ยช่วงไหน</label><input name="fertilizerTiming" class="form-input" value="${safeVal('fertilizerTiming')}"></div>
+                    <div><label class="form-label">ลักษณะตัวตนในพื้นที่</label><input name="communityRole" class="form-input" value="${safeVal('communityRole')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">ความคิดเรื่องปุ๋ยอินทรีย์</label><textarea name="organicFertilizerOpinion" class="form-textarea">${safeVal('organicFertilizerOpinion')}</textarea></div>
+                    <div class="md:col-span-2"><label class="form-label">อาชีพอื่นๆ</label><input name="otherOccupations" class="form-input" value="${safeVal('otherOccupations')}"></div>
+                     <div><label class="form-label">รูปเกษตรกร</label><input name="farmerImage" type="file" class="form-input"></div>
                 </div></div>`;
-            } // Add trial form here...
+            } else if (type === 'trial') {
+                const farmers = allData.filter(d => d.formType === 'เกษตรกร');
+                const farmerOptions = farmers.map(f => `<option value="${f.farmerName}" ${safeVal('linkedFarmerName') === f.farmerName ? 'selected' : ''}>${f.farmerName}</option>`).join('');
+                title = isEdit ? 'แก้ไขข้อมูลแปลงทดลอง' : 'เพิ่มข้อมูลแปลงทดลอง';
+                formType = 'แปลงทดลอง';
+                html = `<div class="p-6 overflow-y-auto"><h3 class="text-xl font-bold mb-6 border-b pb-4">ข้อมูลการขอทำแปลง</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="form-label">เกษตรกรเจ้าของแปลง</label><select name="linkedFarmerName" class="form-select"><option value="">-- ไม่ระบุ --</option>${farmerOptions}</select></div>
+                    <div><label class="form-label">ชื่อเจ้าของสวน (ถ้าไม่ตรงกับเกษตรกร)</label><input name="trialFarmerName" class="form-input" value="${safeVal('trialFarmerName')}"></div>
+                    <div><label class="form-label">ร้านตัวแทน</label><input name="agentStore" class="form-input" value="${safeVal('agentStore')}"></div>
+                    <div><label class="form-label">เบอร์โทร</label><input name="trialFarmerPhone" class="form-input" value="${safeVal('trialFarmerPhone')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">ที่อยู่</label><textarea name="trialFarmerAddress" class="form-textarea">${safeVal('trialFarmerAddress')}</textarea></div>
+                    <div><label class="form-label">พื้นที่ทำเกษตรทั้งหมด (ไร่)</label><input name="totalFarmArea" type="number" class="form-input" value="${safeVal('totalFarmArea')}"></div>
+                    <div><label class="form-label">พืชที่ทดลอง</label><input name="trialCrop" class="form-input" value="${safeVal('trialCrop')}"></div>
+                    <div><label class="form-label">พื้นที่ทดลอง (ไร่)</label><input name="trialArea" type="number" class="form-input" value="${safeVal('trialArea')}"></div>
+                    <div><label class="form-label">ปุ๋ยที่ทดลอง</label><input name="trialFertilizer" class="form-input" value="${safeVal('trialFertilizer')}"></div>
+                    <div><label class="form-label">ช่วงเวลาทดลอง</label><input name="trialPeriod" class="form-input" value="${safeVal('trialPeriod')}"></div>
+                    <div><label class="form-label">ทำสวนเองหรือมีคนงาน</label><input name="laborInfo" class="form-input" value="${safeVal('laborInfo')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">ปัญหาการปลูกที่ต้องการทดลอง</label><textarea name="reasonForTrial" class="form-textarea">${safeVal('reasonForTrial')}</textarea></div>
+                </div>
+                <h3 class="text-xl font-bold mt-8 mb-6 border-b pb-4">ข้อมูลการติดตามผล</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2"><label class="form-label">GPS แปลง</label><div class="flex"><input name="plotGps" id="gps-input" class="form-input rounded-r-none" value="${safeVal('plotGps')}"><button type="button" onclick="getGeoLocation('gps-input')" class="bg-blue-500 text-white px-4 rounded-r-lg"><i class="fas fa-map-marker-alt"></i></button></div></div>
+                    <div><label class="form-label">ลักษณะพื้นที่และดิน</label><input name="soilDescription" class="form-input" value="${safeVal('soilDescription')}"></div>
+                    <div><label class="form-label">ปุ๋ยที่เคยใช้</label><input name="previousFertilizer" class="form-input" value="${safeVal('previousFertilizer')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">วิธีใช้ปุ๋ยทดลอง</label><textarea name="applicationMethod" class="form-textarea">${safeVal('applicationMethod')}</textarea></div>
+                    <div class="md:col-span-2"><label class="form-label">ผลที่คาดหวัง</label><textarea name="expectedOutcome" class="form-textarea">${safeVal('expectedOutcome')}</textarea></div>
+                    <div><label class="form-label">วันติดตามผล</label><input name="followUpDate" type="date" class="form-input" value="${safeVal('followUpDate')}"></div>
+                    <div><label class="form-label">ผลเป็นไปตามคาดหวังหรือไม่</label><select name="isOutcomeAsExpected" class="form-select"><option ${safeVal('isOutcomeAsExpected') === 'ใช่' ? 'selected' : ''}>ใช่</option><option ${safeVal('isOutcomeAsExpected') === 'ไม่' ? 'selected' : ''}>ไม่</option><option ${safeVal('isOutcomeAsExpected') === 'ยังไม่ทราบ' ? 'selected' : ''}>ยังไม่ทราบ</option></select></div>
+                    <div><label class="form-label">การเปลี่ยนแปลงของดิน</label><input name="soilChange" class="form-input" value="${safeVal('soilChange')}"></div>
+                    <div><label class="form-label">การเปลี่ยนแปลงของพืช</label><input name="plantChange" class="form-input" value="${safeVal('plantChange')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">โอกาสที่จะซื้อหลังทดลอง</label><input name="purchaseLikelihood" class="form-input" value="${safeVal('purchaseLikelihood')}"></div>
+                    <div><label class="form-label">รูปแปลง</label><input name="plotImage" type="file" class="form-input"></div>
+                </div></div>`;
+            }
 
             formModalContainer.innerHTML = `
                 <header class="p-4 flex items-center border-b sticky top-0 bg-white"><h2 class="text-xl font-bold text-center flex-grow">${title}</h2><button onclick="closeFormModal()"><i class="fas fa-times text-2xl text-gray-600"></i></button></header>
@@ -303,6 +367,15 @@
             submitButton.disabled = true;
 
             const formData = new FormData(form);
+            form.querySelectorAll('input[type="file"]').forEach(fileInput => {
+                if (fileInput.files.length > 0) {
+                    formData.set(fileInput.name, fileInput.files[0].name);
+                } else {
+                    const existingValue = new FormData(form).get(fileInput.name);
+                    if(!existingValue) formData.delete(fileInput.name);
+                }
+            });
+
             const data = Object.fromEntries(formData.entries());
             const isEdit = data.rowId && data.rowId !== '';
             
@@ -350,6 +423,7 @@
                 if(response.result === 'success' && Array.isArray(response.data)) {
                     allData = response.data;
                     renderAllTabs();
+                    initDashboard(); // Update dashboard after fetching
                 } else {
                    throw new Error(response.message || "Invalid data format from server");
                 }
@@ -360,40 +434,92 @@
         }
         
         function renderAllTabs() {
-            renderDataList('stores', 'ร้านค้า');
-            renderDataList('farmers', 'เกษตรกร');
-            renderDataList('trials', 'แปลงทดลอง');
+            renderDataList('stores');
+            renderDataList('farmers');
         }
 
-        function renderDataList(tabId, formType) {
+        function renderDataList(tabId) {
             const container = document.getElementById(`${tabId}-tab`);
             if(!container) return;
             
-            const data = allData.filter(item => item.formType === formType);
+            const formType = tabId === 'stores' ? 'ร้านค้า' : 'เกษตรกร';
+            const searchTerm = searchInput.value.toLowerCase();
+            const data = allData.filter(item => {
+                if (item.formType !== formType) return false;
+                const name = item.storeName || item.farmerName || '';
+                return name.toLowerCase().includes(searchTerm);
+            });
             
-            container.innerHTML = `<div class="grid grid-cols-2 md:grid-cols-3 p-4 font-bold text-gray-500 border-b"><div class="col-span-1 md:col-span-2">ชื่อ</div><div></div></div>`;
+            container.innerHTML = '';
 
             if (data.length === 0) {
-                container.innerHTML += `<p class="p-4 text-center text-gray-400">ไม่มีข้อมูล</p>`;
+                container.innerHTML = `<p class="p-4 text-center text-gray-400">ไม่มีข้อมูล</p>`;
                 return;
             }
 
             data.forEach(item => {
-                let name = item.storeName || item.farmerName || item.trialName || 'N/A';
+                let name = item.storeName || item.farmerName;
+                let subtext = item.ownerName || item.cropsGrown || `โดย: ${item.createdBy}`;
+                let iconClass = item.formType === 'ร้านค้า' ? 'fa-store text-blue-500' : 'fa-leaf text-green-500';
+
                 const row = document.createElement('div');
-                row.className = 'grid grid-cols-2 md:grid-cols-3 p-4 items-center border-b hover:bg-gray-50';
+                row.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-50';
+                row.onclick = () => showPage("detail", item);
                 row.innerHTML = `
-                    <div class="col-span-1 md:col-span-2 font-semibold text-gray-800">${name}</div>
-                    <div class="text-right">
-                        <button onclick='handleEditClick(${JSON.stringify(item)})' class="text-blue-500 hover:text-blue-700"><i class="fas fa-pencil-alt"></i></button>
+                    <div class="flex items-center space-x-4">
+                        <i class="fas ${iconClass} text-xl w-6 text-center"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">${name}</p>
+                            <p class="text-sm text-gray-500">${subtext}</p>
+                        </div>
                     </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
                 `;
                 container.appendChild(row);
             });
         }
 
         function handleEditClick(data) {
-            generateForm(data.formType.toLowerCase(), data);
+            let type = '';
+            if (data.formType === 'ร้านค้า') type = 'store';
+            else if (data.formType === 'เกษตรกร') type = 'farmer';
+            else if (data.formType === 'แปลงทดลอง') type = 'trial';
+            
+            if (type) {
+                generateForm(type, data);
+            }
+        }
+
+        function renderDetailPage(data) {
+            const container = document.getElementById('detail-page');
+            let detailsHtml = '';
+            let linkedHtml = '';
+
+            // Generate details view
+            for (const [key, value] of Object.entries(data)) {
+                if(value && key !== 'formType' && key !== 'rowId' && key !== 'sheetRow' && key !== 'linkedStoreName' && key !== 'linkedFarmerName') {
+                    detailsHtml += `<div class="flex justify-between py-2 border-b"><span class="text-gray-500">${key}</span><span class="font-semibold text-right">${value}</span></div>`;
+                }
+            }
+            
+            // Generate linked data view
+            if (data.formType === 'ร้านค้า') {
+                const linkedFarmers = allData.filter(f => f.formType === 'เกษตรกร' && f.linkedStoreName === data.storeName);
+                linkedHtml = `<h3 class="text-lg font-bold mt-6 mb-2">เกษตรกรในสังกัด</h3>`;
+                if (linkedFarmers.length > 0) {
+                    linkedHtml += linkedFarmers.map(f => `<div class="bg-gray-200 p-2 rounded">${f.farmerName}</div>`).join('');
+                } else {
+                    linkedHtml += `<p class="text-gray-500">ไม่มีข้อมูล</p>`;
+                }
+            }
+
+            container.innerHTML = `<div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold">${data.storeName || data.farmerName}</h2>
+                    <button onclick='handleEditClick(${JSON.stringify(data)})' class="text-blue-500 hover:text-blue-700 text-lg"><i class="fas fa-pencil-alt"></i></button>
+                </div>
+                ${detailsHtml}${linkedHtml}
+            </div>`;
         }
         
         // --- Dashboard Functionality ---
@@ -401,18 +527,16 @@
             if (allData.length === 0) await fetchData(true);
             document.getElementById('store-count').textContent = allData.filter(d => d.formType === 'ร้านค้า').length;
             document.getElementById('farmer-count').textContent = allData.filter(d => d.formType === 'เกษตรกร').length;
-            document.getElementById('trial-count').textContent = allData.filter(d => d.formType === 'แปลงทดลอง').length;
-            document.getElementById('sales-total').textContent = '550';
             initDashboardCharts();
         }
 
         function initDashboardCharts() {
-            if (lineChartInstance) lineChartInstance.destroy();
-            if (barChartInstance) barChartInstance.destroy();
-            const lineCtx = document.getElementById('lineChart').getContext('2d');
-            lineChartInstance = new Chart(lineCtx, { type: 'line', data: { labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'], datasets: [{ label: 'ร้านค้า', data: [2, 3, 5, 6, 8, 9], borderColor: '#3b82f6', tension: 0.1 }, { label: 'เกษตรกร', data: [5, 6, 7, 9, 11, 14], borderColor: '#22c55e', tension: 0.1 }] } });
-            const barCtx = document.getElementById('barChart').getContext('2d');
-            barChartInstance = new Chart(barCtx, { type: 'bar', data: { labels: ['ปุ๋ย A', 'ปุ๋ย B', 'ปุ๋ย C', 'อื่นๆ'], datasets: [{ label: 'ยอดขาย', data: [120, 190, 80, 50], backgroundColor: ['#3b82f6', '#22c55e', '#a855f7', '#f59e0b'] }] }, options: { indexAxis: 'y' } });
+            if (doughnutChartInstance) doughnutChartInstance.destroy();
+            const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+            const storeCount = allData.filter(d => d.formType === 'ร้านค้า').length;
+            const farmerCount = allData.filter(d => d.formType === 'เกษตรกร').length;
+            const trialCount = allData.filter(d => d.formType === 'แปลงทดลอง').length;
+            doughnutChartInstance = new Chart(doughnutCtx, { type: 'doughnut', data: { labels: ['ร้านค้า', 'เกษตรกร', 'แปลงทดลอง'], datasets: [{ label: 'สัดส่วนข้อมูล', data: [storeCount, farmerCount, trialCount], backgroundColor: ['#3b82f6', '#22c55e', '#a855f7'], hoverOffset: 4 }] } });
         }
 
         // --- Map Functionality ---
@@ -420,8 +544,35 @@
             if (map) { map.invalidateSize(); return; }
             map = L.map('map').setView([13.7563, 100.5018], 6);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const coords = [pos.coords.latitude, pos.coords.longitude];
+                    map.setView(coords, 13);
+                    L.marker(coords, { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] }) }).addTo(map).bindPopup('<b>ตำแหน่งของคุณ</b>').openPopup();
+                });
+            }
+            if (allData.length > 0) plotDataOnMap();
         }
 
+        function plotDataOnMap() {
+            allData.forEach(item => {
+                const gps = item.gps || item.plotGps;
+                if (gps && gps.includes(',')) {
+                    const [lat, lon] = gps.split(',').map(s => parseFloat(s.trim()));
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        const isStore = item.formType === 'ร้านค้า';
+                        const isTrial = item.formType === 'แปลงทดลอง';
+                        const name = item.storeName || item.farmerName || item.trialFarmerName || 'N/A';
+                        const iconColor = isStore ? 'blue' : (isTrial ? 'violet' : 'green');
+                        const markerIcon = new L.Icon({ iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${iconColor}.png`, shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] });
+                        const popupContent = `<b>${name}</b><br><a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}" target="_blank" class="text-blue-600 font-bold">นำทาง</a>`;
+                        L.marker([lat, lon], {icon: markerIcon}).addTo(map).bindPopup(popupContent);
+                    }
+                }
+            });
+        }
+        
         // --- Utility Functions ---
         function showMessageModal(message) {
             const modal = document.getElementById('message-modal');
@@ -442,8 +593,9 @@
 
         // --- Event Listeners ---
         loginForm.addEventListener('submit', handleLogin);
-        document.getElementById('logout-button-desktop').addEventListener('click', handleLogout);
-        document.getElementById('logout-button-mobile').addEventListener('click', handleLogout);
+        document.getElementById('logout-button').addEventListener('click', handleLogout);
+        backButton.addEventListener('click', () => showPage('feed'));
+        searchInput.addEventListener('input', () => renderAllTabs());
 
         // --- Initial Load ---
         checkSession();
