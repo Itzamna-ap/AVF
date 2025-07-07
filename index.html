@@ -549,8 +549,11 @@
         }
         
         // --- Dashboard Functionality ---
-        async function initDashboard() {
-            if (allData.length === 0) await fetchData(true);
+        function initDashboard() {
+            if (allData.length === 0) {
+                // Data is fetched on initializeApp, so we just need to render
+                return;
+            }
             document.getElementById('store-count').textContent = allData.filter(d => d.formType === 'ร้านค้า').length;
             document.getElementById('farmer-count').textContent = allData.filter(d => d.formType === 'เกษตรกร').length;
             initDashboardCharts();
