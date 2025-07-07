@@ -32,8 +32,8 @@
         .form-label { display: block; font-weight: 500; color: #374151; margin-bottom: 0.5rem; }
 
         /* Animation for modal */
-        #form-modal { transition: opacity 0.3s ease; }
-        #form-modal.hidden { opacity: 0; pointer-events: none; }
+        #form-modal, #loading-overlay { transition: opacity 0.3s ease; }
+        #form-modal.hidden, #loading-overlay.hidden { opacity: 0; pointer-events: none; }
         .form-modal-content { transition: transform 0.3s ease; }
         #form-modal.hidden .form-modal-content { transform: scale(0.95); }
     </style>
@@ -114,6 +114,12 @@
         <div class="bg-white p-6 rounded-lg shadow-xl text-center w-11/12 max-w-sm"><p id="modal-message" class="text-lg"></p><button onclick="closeMessageModal()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-md w-full">ตกลง</button></div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex flex-col items-center justify-center text-white">
+        <i class="fas fa-spinner fa-spin text-4xl"></i>
+        <p id="loading-text" class="mt-4 text-lg">กำลังโหลดข้อมูล...</p>
+    </div>
+
     <script>
         // --- PWA Service Worker Registration ---
         if ('serviceWorker' in navigator) {
@@ -137,17 +143,28 @@
         const loginForm = document.getElementById('login-form');
         const backButton = document.getElementById('back-button');
         const searchInput = document.getElementById('search-input');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
 
         // --- Generic Fetch Function ---
-        async function apiCall(payload) {
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                cache: 'no-cache', // Explicitly tell the browser not to cache this request
-                body: JSON.stringify(payload),
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-            });
-             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return await response.json();
+        async function apiCall(payload, loadingMessage = null) {
+            if (loadingMessage) {
+                loadingText.textContent = loadingMessage;
+                loadingOverlay.classList.remove('hidden');
+            }
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return await response.json();
+            } finally {
+                if (loadingMessage) {
+                    loadingOverlay.classList.add('hidden');
+                }
+            }
         }
 
         // --- Authentication & Initialization ---
@@ -162,7 +179,7 @@
             submitButton.disabled = true;
 
             try {
-                const data = await apiCall({ action: 'login', username, password });
+                const data = await apiCall({ action: 'login', username, password }, "กำลังเข้าสู่ระบบ...");
                 if (data.result === 'success' && data.user) {
                     currentUser = data.user;
                     sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -179,12 +196,11 @@
             }
         }
         
-        function initializeApp() {
+        async function initializeApp() {
             loginView.classList.remove('active');
             mainAppView.classList.add('active');
-            fetchData().then(() => {
-                showPage('dashboard');
-            });
+            await fetchData(true);
+            showPage('dashboard');
         }
 
         function handleLogout() {
@@ -395,7 +411,7 @@
             if(!isEdit) payload.payload.createdBy = currentUser.username;
 
             try {
-                const response = await apiCall(payload);
+                const response = await apiCall(payload, "กำลังบันทึกข้อมูล...");
                 if (response.result === 'success') {
                     showMessageModal(isEdit ? 'แก้ไขข้อมูลสำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!');
                     closeFormModal();
@@ -428,11 +444,11 @@
                     username: currentUser.username,
                     role: currentUser.role,
                     team: currentUser.team || ''
-                });
+                }, "กำลังโหลดข้อมูล...");
                 if(response.result === 'success' && Array.isArray(response.data)) {
                     allData = response.data;
                     renderAllTabs();
-                    initDashboard(); // Update dashboard after fetching
+                    initDashboard();
                 } else {
                    throw new Error(response.message || "Invalid data format from server");
                 }
