@@ -13,7 +13,7 @@
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffffff">
-    <link rel="apple-touch-icon" href="./icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="https://img5.pic.in.th/file/secure-sv1/428709424_3685682595091856_2231537038448980245_n.th.jpg">
 
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f4f5f7; }
@@ -179,7 +179,8 @@
                 const data = await apiCall({ action: 'login', username, password }, "กำลังเข้าสู่ระบบ...");
                 if (data.result === 'success' && data.user) {
                     currentUser = data.user;
-                    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    // ** FIX: Use localStorage for persistence **
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     initializeApp();
                 } else {
                     loginError.textContent = data.message || 'Username หรือ Password ไม่ถูกต้อง';
@@ -201,12 +202,14 @@
         }
 
         function handleLogout() {
-            sessionStorage.removeItem('currentUser');
+            // ** FIX: Use localStorage for persistence **
+            localStorage.removeItem('currentUser');
             location.reload();
         }
 
         function checkSession() {
-            const user = sessionStorage.getItem('currentUser');
+            // ** FIX: Use localStorage for persistence **
+            const user = localStorage.getItem('currentUser');
             if (user) {
                 currentUser = JSON.parse(user);
                 initializeApp();
