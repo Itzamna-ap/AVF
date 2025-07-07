@@ -24,11 +24,11 @@
         .page-content, .tab-content { display: none; }
         .page-content.active, .tab-content.active { display: block; }
 
-        .bottom-nav-item.active { color: #22c55e; }
-        .tab-button.active { color: #22c55e; background-color: #fff; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
+        .bottom-nav-item.active { color: #ec4899; }
+        .tab-button.active { color: #ec4899; background-color: #fff; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); }
         
         .form-input, .form-select, .form-textarea { width: 100%; background-color: #fff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem; font-size: 1rem; transition: box-shadow 0.2s, border-color 0.2s; }
-        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4); }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.4); }
         .form-label { display: block; font-weight: 500; color: #374151; margin-bottom: 0.5rem; }
 
         /* Animation for modal */
@@ -43,11 +43,11 @@
     <!-- ===== Login View ===== -->
     <div id="login-view" class="view active place-items-center min-h-screen">
         <div class="w-full max-w-sm p-8 space-y-6">
-            <div class="text-center"><i class="fas fa-leaf text-5xl text-green-500"></i><h1 class="text-4xl font-bold text-gray-800 mt-4">Advance Fertilizer</h1><p class="text-gray-500">กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p></div>
+            <div class="text-center"><img src="https://img5.pic.in.th/file/secure-sv1/428709424_3685682595091856_2231537038448980245_n.th.jpg" class="w-24 h-24 mx-auto rounded-full shadow-md"><h1 class="text-4xl font-bold text-gray-800 mt-4">Advance Fertilizer</h1><p class="text-gray-500">กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p></div>
             <form id="login-form" class="space-y-4">
                 <div><label for="username" class="form-label text-left">ชื่อผู้ใช้</label><input id="username" type="text" class="form-input"></div>
                 <div><label for="password" class="form-label text-left">รหัสผ่าน</label><input id="password" type="password" class="form-input"></div>
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg !mt-6 transform active:scale-95 transition-transform">เข้าสู่ระบบ</button>
+                <button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-4 rounded-lg !mt-6 transform active:scale-95 transition-transform">เข้าสู่ระบบ</button>
                 <p id="login-error" class="text-red-500 text-center text-sm pt-2 h-6"></p>
             </form>
         </div>
@@ -75,12 +75,13 @@
                 </div>
                 <!-- Feed Page (List View) -->
                 <div id="feed-page" class="page-content">
-                    <div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold text-gray-800">ข้อมูลลูกค้า</h1><button onclick="showAddFormSelection()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><i class="fas fa-plus"></i><span>เพิ่ม</span></button></div>
-                    <div class="p-1 bg-gray-200 rounded-lg flex space-x-1 mb-4"><button onclick="showTab('stores')" class="tab-button w-1/2 py-2 rounded-md" data-active="true">ร้านค้า</button><button onclick="showTab('farmers')" class="tab-button w-1/2 py-2 rounded-md">เกษตรกร</button></div>
+                    <div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold text-gray-800">ข้อมูลลูกค้า</h1><button onclick="showAddFormSelection()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><i class="fas fa-plus"></i><span>เพิ่ม</span></button></div>
+                    <div class="p-1 bg-gray-200 rounded-lg flex space-x-1 mb-4"><button onclick="showTab('stores')" class="tab-button w-1/3 py-2 rounded-md" data-active="true">ร้านค้า</button><button onclick="showTab('farmers')" class="tab-button w-1/3 py-2 rounded-md">เกษตรกร</button><button onclick="showTab('trials')" class="tab-button w-1/3 py-2 rounded-md">แปลงทดลอง</button></div>
                     <div class="relative mb-4"><input id="search-input" type="text" placeholder="ค้นหาด้วยชื่อ..." class="form-input pl-10"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i></div>
                     <div id="feed-container">
                         <div id="stores-tab" class="tab-content active space-y-3"></div>
                         <div id="farmers-tab" class="tab-content space-y-3"></div>
+                        <div id="trials-tab" class="tab-content space-y-3"></div>
                     </div>
                     <p id="empty-feed" class="hidden text-center text-gray-500 py-10">ไม่มีข้อมูล</p>
                 </div>
@@ -89,11 +90,6 @@
                 <!-- Map Page -->
                 <div id="map-page" class="page-content"><div id="map" class="h-full w-full rounded-lg shadow-md min-h-[calc(100vh-160px)]"></div></div>
             </main>
-
-            <!-- Floating Action Button -->
-            <button onclick="showAddFormSelection()" class="fixed bottom-20 right-5 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center z-20 transform active:scale-90 transition-transform">
-                <i class="fas fa-plus text-2xl"></i>
-            </button>
 
             <!-- Bottom Navigation -->
             <nav class="bg-white border-t flex justify-around p-2 fixed bottom-0 w-full z-10">
@@ -111,7 +107,7 @@
     
     <!-- Message Modal -->
     <div id="message-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded-lg shadow-xl text-center w-11/12 max-w-sm"><p id="modal-message" class="text-lg"></p><button onclick="closeMessageModal()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-md w-full">ตกลง</button></div>
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center w-11/12 max-w-sm"><p id="modal-message" class="text-lg"></p><button onclick="closeMessageModal()" class="mt-4 bg-pink-500 text-white px-6 py-2 rounded-md w-full">ตกลง</button></div>
     </div>
 
     <!-- Loading Overlay -->
@@ -283,91 +279,91 @@
                 title = isEdit ? 'แก้ไขข้อมูลร้านค้า' : 'เพิ่มข้อมูลร้านค้า';
                 formType = 'ร้านค้า';
                 html = `<div class="p-6 overflow-y-auto"><h3 class="text-xl font-bold mb-6 border-b pb-4">ข้อมูลร้านค้า</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div><label class="form-label">ชื่อร้านค้า</label><input name="storeName" class="form-input" required value="${safeVal('storeName')}"></div>
-                    <div><label class="form-label">สถานะ</label><select name="storeStatus" class="form-select"><option ${safeVal('storeStatus') === 'ร้านเก่า' ? 'selected' : ''}>ร้านเก่า</option><option ${safeVal('storeStatus') === 'ร้านใหม่' ? 'selected' : ''}>ร้านใหม่</option></select></div>
-                    <div class="md:col-span-2"><label class="form-label">GPS</label><div class="flex"><input name="gps" id="gps-input" class="form-input rounded-r-none" value="${safeVal('gps')}"><button type="button" onclick="getGeoLocation('gps-input')" class="bg-blue-500 text-white px-4 rounded-r-lg"><i class="fas fa-map-marker-alt"></i></button></div></div>
-                    <div><label class="form-label">ขนาดร้านค้า</label><input name="storeSize" class="form-input" value="${safeVal('storeSize')}"></div>
-                    <div><label class="form-label">เปิดมากี่ปี</label><input name="yearsOpen" type="number" class="form-input" value="${safeVal('yearsOpen')}"></div>
-                    <div><label class="form-label">สินค้าหลัก</label><input name="mainProducts" class="form-input" value="${safeVal('mainProducts')}"></div>
-                    <div><label class="form-label">ยอดปุ๋ย/ปี</label><input name="fertilizerSalesPerYear" class="form-input" value="${safeVal('fertilizerSalesPerYear')}"></div>
-                    <div><label class="form-label">การจ่ายเงิน</label><input name="paymentMethod" class="form-input" value="${safeVal('paymentMethod')}"></div>
-                    <div><label class="form-label">พืชหลักในพื้นที่</label><input name="mainCropsInArea" class="form-input" value="${safeVal('mainCropsInArea')}"></div>
-                    <div><label class="form-label">พื้นที่ขายของร้าน</label><input name="salesFloorArea" class="form-input" value="${safeVal('salesFloorArea')}"></div>
-                    <div><label class="form-label">ลักษณะการขาย</label><input name="salesStyle" class="form-input" value="${safeVal('salesStyle')}"></div>
-                    <div><label class="form-label">มีร้านซาปัวหรือไม่</label><select name="hasSubDealer" class="form-select"><option ${safeVal('hasSubDealer') === 'มี' ? 'selected' : ''}>มี</option><option ${safeVal('hasSubDealer') === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option></select></div>
-                    <div><label class="form-label">มีแบรนด์ของตัวเองหรือไม่</label><select name="hasOwnBrand" class="form-select"><option ${safeVal('hasOwnBrand') === 'มี' ? 'selected' : ''}>มี</option><option ${safeVal('hasOwnBrand') === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option></select></div>
-                    <div><label class="form-label">ลักษณะของร้าน</label><input name="storeOwnership" class="form-input" value="${safeVal('storeOwnership')}"></div>
-                    <div><label class="form-label">รูปร้าน</label><input name="storeImage" type="file" class="form-input"></div>
+                    <div><label class="form-label">ชื่อร้านค้า</label><input name="ชื่อร้านค้า" class="form-input" required value="${safeVal('ชื่อร้านค้า')}"></div>
+                    <div><label class="form-label">สถานะ</label><select name="สถานะ" class="form-select"><option ${safeVal('สถานะ') === 'ร้านเก่า' ? 'selected' : ''}>ร้านเก่า</option><option ${safeVal('สถานะ') === 'ร้านใหม่' ? 'selected' : ''}>ร้านใหม่</option></select></div>
+                    <div class="md:col-span-2"><label class="form-label">GPS</label><div class="flex"><input name="GPS" id="gps-input" class="form-input rounded-r-none" value="${safeVal('GPS')}"><button type="button" onclick="getGeoLocation('gps-input')" class="bg-blue-500 text-white px-4 rounded-r-lg"><i class="fas fa-map-marker-alt"></i></button></div></div>
+                    <div><label class="form-label">ขนาดร้านค้า</label><input name="ขนาดร้านค้า" class="form-input" value="${safeVal('ขนาดร้านค้า')}"></div>
+                    <div><label class="form-label">เปิดมากี่ปี</label><input name="เปิดมากี่ปี" type="number" class="form-input" value="${safeVal('เปิดมากี่ปี')}"></div>
+                    <div><label class="form-label">สินค้าหลัก</label><input name="สินค้าหลัก" class="form-input" value="${safeVal('สินค้าหลัก')}"></div>
+                    <div><label class="form-label">ยอดปุ๋ย/ปี</label><input name="ยอดปุ๋ย/ปี" class="form-input" value="${safeVal('ยอดปุ๋ย/ปี')}"></div>
+                    <div><label class="form-label">การจ่ายเงิน</label><input name="การจ่ายเงิน" class="form-input" value="${safeVal('การจ่ายเงิน')}"></div>
+                    <div><label class="form-label">พืชหลักในพื้นที่</label><input name="พืชหลักในพื้นที่" class="form-input" value="${safeVal('พืชหลักในพื้นที่')}"></div>
+                    <div><label class="form-label">พื้นที่ขายของร้าน</label><input name="พื้นที่ขายของร้าน" class="form-input" value="${safeVal('พื้นที่ขายของร้าน')}"></div>
+                    <div><label class="form-label">ลักษณะการขาย</label><input name="ลักษณะการขาย" class="form-input" value="${safeVal('ลักษณะการขาย')}"></div>
+                    <div><label class="form-label">มีร้านซาปัวหรือไม่</label><select name="มีร้านซาปัวหรือไม่" class="form-select"><option ${safeVal('มีร้านซาปัวหรือไม่') === 'มี' ? 'selected' : ''}>มี</option><option ${safeVal('มีร้านซาปัวหรือไม่') === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option></select></div>
+                    <div><label class="form-label">มีแบรนด์ของตัวเองหรือไม่</label><select name="มีแบรนด์ของตัวเองหรือไม่" class="form-select"><option ${safeVal('มีแบรนด์ของตัวเองหรือไม่') === 'มี' ? 'selected' : ''}>มี</option><option ${safeVal('มีแบรนด์ของตัวเองหรือไม่') === 'ไม่มี' ? 'selected' : ''}>ไม่มี</option></select></div>
+                    <div><label class="form-label">ลักษณะของร้าน</label><input name="ลักษณะของร้าน" class="form-input" value="${safeVal('ลักษณะของร้าน')}"></div>
+                    <div><label class="form-label">รูปร้าน</label><input name="รูปร้าน" type="file" class="form-input"></div>
                 </div>
                 <h3 class="text-xl font-bold mt-8 mb-6 border-b pb-4">พฤติกรรมเจ้าของร้าน</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div><label class="form-label">ชื่อ-สกุล เจ้าของ</label><input name="ownerName" class="form-input" value="${safeVal('ownerName')}"></div>
-                    <div><label class="form-label">เบอร์โทร</label><input name="ownerPhone" class="form-input" value="${safeVal('ownerPhone')}"></div>
-                    <div><label class="form-label">เพศ</label><select name="ownerGender" class="form-select"><option ${safeVal('ownerGender') === 'ชาย' ? 'selected' : ''}>ชาย</option><option ${safeVal('ownerGender') === 'หญิง' ? 'selected' : ''}>หญิง</option></select></div>
-                    <div><label class="form-label">อายุ</label><input name="ownerAge" type="number" class="form-input" value="${safeVal('ownerAge')}"></div>
-                    <div><label class="form-label">สถานะ</label><input name="ownerMaritalStatus" class="form-input" value="${safeVal('ownerMaritalStatus')}"></div>
-                    <div><label class="form-label">รุ่นที่เท่าไรของร้าน</label><input name="ownerGeneration" type="number" class="form-input" value="${safeVal('ownerGeneration')}"></div>
-                    <div><label class="form-label">ชอบสังสรรค์</label><select name="ownerSocializes" class="form-select"><option ${safeVal('ownerSocializes') === 'ชอบ' ? 'selected' : ''}>ชอบ</option><option ${safeVal('ownerSocializes') === 'ไม่ชอบ' ? 'selected' : ''}>ไม่ชอบ</option></select></div>
-                    <div><label class="form-label">งานอดิเรก</label><input name="ownerHobby" class="form-input" value="${safeVal('ownerHobby')}"></div>
-                    <div><label class="form-label">กีฬาที่ชอบ</label><input name="ownerSport" class="form-input" value="${safeVal('ownerSport')}"></div>
-                    <div class="md:col-span-2"><label class="form-label">เป็นคนประเภทใด</label><select name="ownerPersonality" class="form-select"><option ${safeVal('ownerPersonality') === 'ชอบเจ๊าะแจ๊ะ' ? 'selected' : ''}>ชอบเจ๊าะแจ๊ะ</option><option ${safeVal('ownerPersonality') === 'ชอบข้อมูล' ? 'selected' : ''}>ชอบข้อมูล</option><option ${safeVal('ownerPersonality') === 'ชอบทดลอง' ? 'selected' : ''}>ชอบทดลอง</option><option ${safeVal('ownerPersonality') === 'ชอบต่อราคา' ? 'selected' : ''}>ชอบต่อราคา</option></select></div>
-                    <div class="md:col-span-2"><label class="form-label">แนวคิดการตลาดปุ๋ย</label><textarea name="fertilizerMarketingConcept" class="form-textarea h-24">${safeVal('fertilizerMarketingConcept')}</textarea></div>
-                    <div><label class="form-label">รูปเจ้าของร้าน</label><input name="ownerImage" type="file" class="form-input"></div>
+                    <div><label class="form-label">ชื่อเจ้าของ</label><input name="ชื่อเจ้าของ" class="form-input" value="${safeVal('ชื่อเจ้าของ')}"></div>
+                    <div><label class="form-label">เบอร์โทรเจ้าของ</label><input name="เบอร์โทรเจ้าของ" class="form-input" value="${safeVal('เบอร์โทรเจ้าของ')}"></div>
+                    <div><label class="form-label">เพศเจ้าของ</label><select name="เพศเจ้าของ" class="form-select"><option ${safeVal('เพศเจ้าของ') === 'ชาย' ? 'selected' : ''}>ชาย</option><option ${safeVal('เพศเจ้าของ') === 'หญิง' ? 'selected' : ''}>หญิง</option></select></div>
+                    <div><label class="form-label">อายุเจ้าของ</label><input name="อายุเจ้าของ" type="number" class="form-input" value="${safeVal('อายุเจ้าของ')}"></div>
+                    <div><label class="form-label">สถานะเจ้าของ</label><input name="สถานะเจ้าของ" class="form-input" value="${safeVal('สถานะเจ้าของ')}"></div>
+                    <div><label class="form-label">รุ่นที่ของร้าน</label><input name="รุ่นที่ของร้าน" type="number" class="form-input" value="${safeVal('รุ่นที่ของร้าน')}"></div>
+                    <div><label class="form-label">ชอบสังสรรค์</label><select name="ชอบสังสรรค์" class="form-select"><option ${safeVal('ชอบสังสรรค์') === 'ชอบ' ? 'selected' : ''}>ชอบ</option><option ${safeVal('ชอบสังสรรค์') === 'ไม่ชอบ' ? 'selected' : ''}>ไม่ชอบ</option></select></div>
+                    <div><label class="form-label">งานอดิเรก</label><input name="งานอดิเรก" class="form-input" value="${safeVal('งานอดิเรก')}"></div>
+                    <div><label class="form-label">กีฬาที่ชอบ</label><input name="กีฬาที่ชอบ" class="form-input" value="${safeVal('กีฬาที่ชอบ')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">เป็นคนประเภทใด</label><select name="เป็นคนประเภทใด" class="form-select"><option ${safeVal('เป็นคนประเภทใด') === 'ชอบเจ๊าะแจ๊ะ' ? 'selected' : ''}>ชอบเจ๊าะแจ๊ะ</option><option ${safeVal('เป็นคนประเภทใด') === 'ชอบข้อมูล' ? 'selected' : ''}>ชอบข้อมูล</option><option ${safeVal('เป็นคนประเภทใด') === 'ชอบทดลอง' ? 'selected' : ''}>ชอบทดลอง</option><option ${safeVal('เป็นคนประเภทใด') === 'ชอบต่อราคา' ? 'selected' : ''}>ชอบต่อราคา</option></select></div>
+                    <div class="md:col-span-2"><label class="form-label">แนวคิดการตลาดปุ๋ย</label><textarea name="แนวคิดการตลาดปุ๋ย" class="form-textarea h-24">${safeVal('แนวคิดการตลาดปุ๋ย')}</textarea></div>
+                    <div><label class="form-label">รูปเจ้าของร้าน</label><input name="รูปเจ้าของร้าน" type="file" class="form-input"></div>
                 </div></div>`;
             } else if (type === 'farmer') {
                 const stores = allData.filter(d => d.formType === 'ร้านค้า');
-                const storeOptions = stores.map(s => `<option value="${s.storeName}" ${safeVal('linkedStoreName') === s.storeName ? 'selected' : ''}>${s.storeName}</option>`).join('');
+                const storeOptions = stores.map(s => `<option value="${s['ชื่อร้านค้า']}" ${safeVal('ร้านค้าในสังกัด') === s['ชื่อร้านค้า'] ? 'selected' : ''}>${s['ชื่อร้านค้า']}</option>`).join('');
                 title = isEdit ? 'แก้ไขข้อมูลเกษตรกร' : 'เพิ่มข้อมูลเกษตรกร';
                 formType = 'เกษตรกร';
                 html = `<div class="p-6 overflow-y-auto"><h3 class="text-xl font-bold mb-6 border-b pb-4">ข้อมูลเกษตรกร</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div><label class="form-label">ชื่อ-สกุล</label><input name="farmerName" class="form-input" required value="${safeVal('farmerName')}"></div>
-                    <div><label class="form-label">ร้านค้าในสังกัด</label><select name="linkedStoreName" class="form-select"><option value="">-- ไม่ระบุ --</option>${storeOptions}</select></div>
-                    <div><label class="form-label">เบอร์โทร</label><input name="farmerPhone" class="form-input" value="${safeVal('farmerPhone')}"></div>
-                    <div class="md:col-span-2"><label class="form-label">ที่อยู่</label><textarea name="farmerAddress" class="form-textarea">${safeVal('farmerAddress')}</textarea></div>
-                    <div><label class="form-label">เพศ</label><select name="farmerGender" class="form-select"><option ${safeVal('farmerGender') === 'ชาย' ? 'selected' : ''}>ชาย</option><option ${safeVal('farmerGender') === 'หญิง' ? 'selected' : ''}>หญิง</option></select></div>
-                    <div><label class="form-label">อายุ</label><input name="farmerAge" type="number" class="form-input" value="${safeVal('farmerAge')}"></div>
-                    <div><label class="form-label">ปลูกอะไร</label><input name="cropsGrown" class="form-input" value="${safeVal('cropsGrown')}"></div>
-                    <div><label class="form-label">ปลูกกี่ไร่</label><input name="farmArea" type="number" class="form-input" value="${safeVal('farmArea')}"></div>
-                    <div><label class="form-label">ใช้ปุ๋ยประเภทไหน</label><input name="fertilizerTypeUsed" class="form-input" value="${safeVal('fertilizerTypeUsed')}"></div>
-                    <div><label class="form-label">ใช้ปุ๋ยปีละกี่ครั้ง/ครั้งละเท่าไร</label><input name="fertilizerApplication" class="form-input" value="${safeVal('fertilizerApplication')}"></div>
-                    <div><label class="form-label">ใช้ปุ๋ยช่วงไหน</label><input name="fertilizerTiming" class="form-input" value="${safeVal('fertilizerTiming')}"></div>
-                    <div><label class="form-label">ลักษณะตัวตนในพื้นที่</label><input name="communityRole" class="form-input" value="${safeVal('communityRole')}"></div>
-                    <div class="md:col-span-2"><label class="form-label">ความคิดเรื่องปุ๋ยอินทรีย์</label><textarea name="organicFertilizerOpinion" class="form-textarea">${safeVal('organicFertilizerOpinion')}</textarea></div>
-                    <div class="md:col-span-2"><label class="form-label">อาชีพอื่นๆ</label><input name="otherOccupations" class="form-input" value="${safeVal('otherOccupations')}"></div>
-                     <div><label class="form-label">รูปเกษตรกร</label><input name="farmerImage" type="file" class="form-input"></div>
+                    <div><label class="form-label">ชื่อเกษตรกร</label><input name="ชื่อเกษตรกร" class="form-input" required value="${safeVal('ชื่อเกษตรกร')}"></div>
+                    <div><label class="form-label">ร้านค้าในสังกัด</label><select name="ร้านค้าในสังกัด" class="form-select"><option value="">-- ไม่ระบุ --</option>${storeOptions}</select></div>
+                    <div><label class="form-label">เบอร์โทรเกษตรกร</label><input name="เบอร์โทรเกษตรกร" class="form-input" value="${safeVal('เบอร์โทรเกษตรกร')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">ที่อยู่เกษตรกร</label><textarea name="ที่อยู่เกษตรกร" class="form-textarea">${safeVal('ที่อยู่เกษตรกร')}</textarea></div>
+                    <div><label class="form-label">เพศเกษตรกร</label><select name="เพศเกษตรกร" class="form-select"><option ${safeVal('เพศเกษตรกร') === 'ชาย' ? 'selected' : ''}>ชาย</option><option ${safeVal('เพศเกษตรกร') === 'หญิง' ? 'selected' : ''}>หญิง</option></select></div>
+                    <div><label class="form-label">อายุเกษตรกร</label><input name="อายุเกษตรกร" type="number" class="form-input" value="${safeVal('อายุเกษตรกร')}"></div>
+                    <div><label class="form-label">ปลูกอะไร</label><input name="ปลูกอะไร" class="form-input" value="${safeVal('ปลูกอะไร')}"></div>
+                    <div><label class="form-label">ปลูกกี่ไร่</label><input name="ปลูกกี่ไร่" type="number" class="form-input" value="${safeVal('ปลูกกี่ไร่')}"></div>
+                    <div><label class="form-label">ใช้ปุ๋ยประเภทไหน</label><input name="ใช้ปุ๋ยประเภทไหน" class="form-input" value="${safeVal('ใช้ปุ๋ยประเภทไหน')}"></div>
+                    <div><label class="form-label">ใช้ปุ๋ยปีละกี่ครั้ง/ครั้งละเท่าไร</label><input name="ใช้ปุ๋ยปีละกี่ครั้ง/ครั้งละเท่าไร" class="form-input" value="${safeVal('ใช้ปุ๋ยปีละกี่ครั้ง/ครั้งละเท่าไร')}"></div>
+                    <div><label class="form-label">ใช้ปุ๋ยช่วงไหน</label><input name="ใช้ปุ๋ยช่วงไหน" class="form-input" value="${safeVal('ใช้ปุ๋ยช่วงไหน')}"></div>
+                    <div><label class="form-label">ลักษณะตัวตนในพื้นที่</label><input name="ลักษณะตัวตนในพื้นที่" class="form-input" value="${safeVal('ลักษณะตัวตนในพื้นที่')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">ความคิดเรื่องปุ๋ยอินทรีย์</label><textarea name="ความคิดเรื่องปุ๋ยอินทรีย์" class="form-textarea">${safeVal('ความคิดเรื่องปุ๋ยอินทรีย์')}</textarea></div>
+                    <div class="md:col-span-2"><label class="form-label">อาชีพอื่นๆ</label><input name="อาชีพอื่นๆ" class="form-input" value="${safeVal('อาชีพอื่นๆ')}"></div>
+                     <div><label class="form-label">รูปเกษตรกร</label><input name="รูปเกษตรกร" type="file" class="form-input"></div>
                 </div></div>`;
             } else if (type === 'trial') {
                 const farmers = allData.filter(d => d.formType === 'เกษตรกร');
-                const farmerOptions = farmers.map(f => `<option value="${f.farmerName}" ${safeVal('linkedFarmerName') === f.farmerName ? 'selected' : ''}>${f.farmerName}</option>`).join('');
+                const farmerOptions = farmers.map(f => `<option value="${f['ชื่อเกษตรกร']}" ${safeVal('เกษตรกรเจ้าของแปลง') === f['ชื่อเกษตรกร'] ? 'selected' : ''}>${f['ชื่อเกษตรกร']}</option>`).join('');
                 title = isEdit ? 'แก้ไขข้อมูลแปลงทดลอง' : 'เพิ่มข้อมูลแปลงทดลอง';
                 formType = 'แปลงทดลอง';
                 html = `<div class="p-6 overflow-y-auto"><h3 class="text-xl font-bold mb-6 border-b pb-4">ข้อมูลการขอทำแปลง</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div><label class="form-label">เกษตรกรเจ้าของแปลง</label><select name="linkedFarmerName" class="form-select"><option value="">-- ไม่ระบุ --</option>${farmerOptions}</select></div>
-                    <div><label class="form-label">ชื่อเจ้าของสวน (ถ้าไม่ตรงกับเกษตรกร)</label><input name="trialFarmerName" class="form-input" value="${safeVal('trialFarmerName')}"></div>
-                    <div><label class="form-label">ร้านตัวแทน</label><input name="agentStore" class="form-input" value="${safeVal('agentStore')}"></div>
-                    <div><label class="form-label">เบอร์โทร</label><input name="trialFarmerPhone" class="form-input" value="${safeVal('trialFarmerPhone')}"></div>
-                    <div class="md:col-span-2"><label class="form-label">ที่อยู่</label><textarea name="trialFarmerAddress" class="form-textarea">${safeVal('trialFarmerAddress')}</textarea></div>
-                    <div><label class="form-label">พื้นที่ทำเกษตรทั้งหมด (ไร่)</label><input name="totalFarmArea" type="number" class="form-input" value="${safeVal('totalFarmArea')}"></div>
-                    <div><label class="form-label">พืชที่ทดลอง</label><input name="trialCrop" class="form-input" value="${safeVal('trialCrop')}"></div>
-                    <div><label class="form-label">พื้นที่ทดลอง (ไร่)</label><input name="trialArea" type="number" class="form-input" value="${safeVal('trialArea')}"></div>
-                    <div><label class="form-label">ปุ๋ยที่ทดลอง</label><input name="trialFertilizer" class="form-input" value="${safeVal('trialFertilizer')}"></div>
-                    <div><label class="form-label">ช่วงเวลาทดลอง</label><input name="trialPeriod" class="form-input" value="${safeVal('trialPeriod')}"></div>
-                    <div><label class="form-label">ทำสวนเองหรือมีคนงาน</label><input name="laborInfo" class="form-input" value="${safeVal('laborInfo')}"></div>
-                    <div class="md:col-span-2"><label class="form-label">ปัญหาการปลูกที่ต้องการทดลอง</label><textarea name="reasonForTrial" class="form-textarea">${safeVal('reasonForTrial')}</textarea></div>
+                    <div><label class="form-label">เกษตรกรเจ้าของแปลง</label><select name="เกษตรกรเจ้าของแปลง" class="form-select"><option value="">-- ไม่ระบุ --</option>${farmerOptions}</select></div>
+                    <div><label class="form-label">ชื่อเจ้าของสวน (ถ้าไม่ตรงกับเกษตรกร)</label><input name="ชื่อเจ้าของสวน" class="form-input" value="${safeVal('ชื่อเจ้าของสวน')}"></div>
+                    <div><label class="form-label">ร้านตัวแทน</label><input name="ร้านตัวแทน" class="form-input" value="${safeVal('ร้านตัวแทน')}"></div>
+                    <div><label class="form-label">เบอร์โทรแปลงทดลอง</label><input name="เบอร์โทรแปลงทดลอง" class="form-input" value="${safeVal('เบอร์โทรแปลงทดลอง')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">ที่อยู่แปลงทดลอง</label><textarea name="ที่อยู่แปลงทดลอง" class="form-textarea">${safeVal('ที่อยู่แปลงทดลอง')}</textarea></div>
+                    <div><label class="form-label">พื้นที่ทำเกษตรทั้งหมด (ไร่)</label><input name="พื้นที่ทำเกษตรทั้งหมด" type="number" class="form-input" value="${safeVal('พื้นที่ทำเกษตรทั้งหมด')}"></div>
+                    <div><label class="form-label">พืชที่ทดลอง</label><input name="พืชที่ทดลอง" class="form-input" value="${safeVal('พืชที่ทดลอง')}"></div>
+                    <div><label class="form-label">พื้นที่ทดลอง (ไร่)</label><input name="พื้นที่ทดลอง" type="number" class="form-input" value="${safeVal('พื้นที่ทดลอง')}"></div>
+                    <div><label class="form-label">ปุ๋ยที่ทดลอง</label><input name="ปุ๋ยที่ทดลอง" class="form-input" value="${safeVal('ปุ๋ยที่ทดลอง')}"></div>
+                    <div><label class="form-label">ช่วงเวลาทดลอง</label><input name="ช่วงเวลาทดลอง" class="form-input" value="${safeVal('ช่วงเวลาทดลอง')}"></div>
+                    <div><label class="form-label">ทำสวนเองหรือมีคนงาน</label><input name="ทำสวนเองหรือมีคนงาน" class="form-input" value="${safeVal('ทำสวนเองหรือมีคนงาน')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">ปัญหาการปลูก</label><textarea name="ปัญหาการปลูก" class="form-textarea">${safeVal('ปัญหาการปลูก')}</textarea></div>
                 </div>
                 <h3 class="text-xl font-bold mt-8 mb-6 border-b pb-4">ข้อมูลการติดตามผล</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="md:col-span-2"><label class="form-label">GPS แปลง</label><div class="flex"><input name="plotGps" id="gps-input" class="form-input rounded-r-none" value="${safeVal('plotGps')}"><button type="button" onclick="getGeoLocation('gps-input')" class="bg-blue-500 text-white px-4 rounded-r-lg"><i class="fas fa-map-marker-alt"></i></button></div></div>
-                    <div><label class="form-label">ลักษณะพื้นที่และดิน</label><input name="soilDescription" class="form-input" value="${safeVal('soilDescription')}"></div>
-                    <div><label class="form-label">ปุ๋ยที่เคยใช้</label><input name="previousFertilizer" class="form-input" value="${safeVal('previousFertilizer')}"></div>
-                    <div class="md:col-span-2"><label class="form-label">วิธีใช้ปุ๋ยทดลอง</label><textarea name="applicationMethod" class="form-textarea">${safeVal('applicationMethod')}</textarea></div>
-                    <div class="md:col-span-2"><label class="form-label">ผลที่คาดหวัง</label><textarea name="expectedOutcome" class="form-textarea">${safeVal('expectedOutcome')}</textarea></div>
-                    <div><label class="form-label">วันติดตามผล</label><input name="followUpDate" type="date" class="form-input" value="${safeVal('followUpDate')}"></div>
-                    <div><label class="form-label">ผลเป็นไปตามคาดหวังหรือไม่</label><select name="isOutcomeAsExpected" class="form-select"><option ${safeVal('isOutcomeAsExpected') === 'ใช่' ? 'selected' : ''}>ใช่</option><option ${safeVal('isOutcomeAsExpected') === 'ไม่' ? 'selected' : ''}>ไม่</option><option ${safeVal('isOutcomeAsExpected') === 'ยังไม่ทราบ' ? 'selected' : ''}>ยังไม่ทราบ</option></select></div>
-                    <div><label class="form-label">การเปลี่ยนแปลงของดิน</label><input name="soilChange" class="form-input" value="${safeVal('soilChange')}"></div>
-                    <div><label class="form-label">การเปลี่ยนแปลงของพืช</label><input name="plantChange" class="form-input" value="${safeVal('plantChange')}"></div>
-                    <div class="md:col-span-2"><label class="form-label">โอกาสที่จะซื้อหลังทดลอง</label><input name="purchaseLikelihood" class="form-input" value="${safeVal('purchaseLikelihood')}"></div>
-                    <div><label class="form-label">รูปแปลง</label><input name="plotImage" type="file" class="form-input"></div>
+                    <div class="md:col-span-2"><label class="form-label">GPS แปลง</label><div class="flex"><input name="GPSแปลง" id="gps-input" class="form-input rounded-r-none" value="${safeVal('GPSแปลง')}"><button type="button" onclick="getGeoLocation('gps-input')" class="bg-blue-500 text-white px-4 rounded-r-lg"><i class="fas fa-map-marker-alt"></i></button></div></div>
+                    <div><label class="form-label">ลักษณะพื้นที่และดิน</label><input name="ลักษณะพื้นที่และดิน" class="form-input" value="${safeVal('ลักษณะพื้นที่และดิน')}"></div>
+                    <div><label class="form-label">ปุ๋ยที่เคยใช้</label><input name="ปุ๋ยที่เคยใช้" class="form-input" value="${safeVal('ปุ๋ยที่เคยใช้')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">วิธีใช้ปุ๋ยทดลอง</label><textarea name="วิธีใช้ปุ๋ยทดลอง" class="form-textarea">${safeVal('วิธีใช้ปุ๋ยทดลอง')}</textarea></div>
+                    <div class="md:col-span-2"><label class="form-label">ผลที่คาดหวัง</label><textarea name="ผลที่คาดหวัง" class="form-textarea">${safeVal('ผลที่คาดหวัง')}</textarea></div>
+                    <div><label class="form-label">วันติดตามผล</label><input name="วันติดตามผล" type="date" class="form-input" value="${safeVal('วันติดตามผล')}"></div>
+                    <div><label class="form-label">ผลเป็นไปตามคาดหวังหรือไม่</label><select name="ผลเป็นไปตามคาดหวังหรือไม่" class="form-select"><option ${safeVal('ผลเป็นไปตามคาดหวังหรือไม่') === 'ใช่' ? 'selected' : ''}>ใช่</option><option ${safeVal('ผลเป็นไปตามคาดหวังหรือไม่') === 'ไม่' ? 'selected' : ''}>ไม่</option><option ${safeVal('ผลเป็นไปตามคาดหวังหรือไม่') === 'ยังไม่ทราบ' ? 'selected' : ''}>ยังไม่ทราบ</option></select></div>
+                    <div><label class="form-label">การเปลี่ยนแปลงของดิน</label><input name="การเปลี่ยนแปลงของดิน" class="form-input" value="${safeVal('การเปลี่ยนแปลงของดิน')}"></div>
+                    <div><label class="form-label">การเปลี่ยนแปลงของพืช</label><input name="การเปลี่ยนแปลงของพืช" class="form-input" value="${safeVal('การเปลี่ยนแปลงของพืช')}"></div>
+                    <div class="md:col-span-2"><label class="form-label">โอกาสที่จะซื้อ</label><input name="โอกาสที่จะซื้อ" class="form-input" value="${safeVal('โอกาสที่จะซื้อ')}"></div>
+                    <div><label class="form-label">รูปแปลง</label><input name="รูปแปลง" type="file" class="form-input"></div>
                 </div></div>`;
             }
 
@@ -377,7 +373,7 @@
                     <input type="hidden" name="formType" value="${formType}">
                     <input type="hidden" name="rowId" value="${safeVal('rowId')}">
                     ${html}
-                    <div class="p-6 mt-auto bg-gray-50 border-t"><button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg">${isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มข้อมูล'}</button></div>
+                    <div class="p-6 mt-auto bg-gray-50 border-t"><button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 rounded-lg">${isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มข้อมูล'}</button></div>
                 </form>
             `;
             formModal.classList.remove('hidden');
@@ -407,9 +403,9 @@
             
             const payload = { 
                 action: isEdit ? 'updateData' : 'saveData', 
-                payload: data 
+                payload: data,
+                user: currentUser // Send user info for logging role/team
             };
-            if(!isEdit) payload.payload.createdBy = currentUser.username;
 
             try {
                 const response = await apiCall(payload, "กำลังบันทึกข้อมูล...");
@@ -462,17 +458,19 @@
         function renderAllTabs() {
             renderDataList('stores');
             renderDataList('farmers');
+            renderDataList('trials');
         }
 
         function renderDataList(tabId) {
             const container = document.getElementById(`${tabId}-tab`);
             if(!container) return;
             
-            const formType = tabId === 'stores' ? 'ร้านค้า' : 'เกษตรกร';
+            const formTypeMapping = { stores: 'ร้านค้า', farmers: 'เกษตรกร', trials: 'แปลงทดลอง' };
+            const formType = formTypeMapping[tabId];
             const searchTerm = searchInput.value.toLowerCase();
             const data = allData.filter(item => {
                 if (item.formType !== formType) return false;
-                const name = item.storeName || item.farmerName || '';
+                const name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['ชื่อเจ้าของสวน'] || '';
                 return name.toLowerCase().includes(searchTerm);
             });
             
@@ -484,9 +482,12 @@
             }
 
             data.forEach(item => {
-                let name = item.storeName || item.farmerName;
-                let subtext = item.ownerName || item.cropsGrown || `โดย: ${item.createdBy}`;
-                let iconClass = item.formType === 'ร้านค้า' ? 'fa-store text-blue-500' : 'fa-leaf text-green-500';
+                let name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['ชื่อเจ้าของสวน'] || 'N/A';
+                let subtext = item['ชื่อเจ้าของ'] || item['ปลูกอะไร'] || `โดย: ${item.createdBy}`;
+                let iconClass = 'fa-question-circle';
+                if(item.formType === 'ร้านค้า') iconClass = 'fa-store text-blue-500';
+                else if(item.formType === 'เกษตรกร') iconClass = 'fa-leaf text-green-500';
+                else if(item.formType === 'แปลงทดลอง') iconClass = 'fa-vial text-purple-500';
 
                 const row = document.createElement('div');
                 row.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-50';
@@ -530,10 +531,10 @@
             
             // Generate linked data view
             if (data.formType === 'ร้านค้า') {
-                const linkedFarmers = allData.filter(f => f.formType === 'เกษตรกร' && f.linkedStoreName === data.storeName);
+                const linkedFarmers = allData.filter(f => f.formType === 'เกษตรกร' && f['ร้านค้าในสังกัด'] === data['ชื่อร้านค้า']);
                 linkedHtml = `<h3 class="text-lg font-bold mt-6 mb-2">เกษตรกรในสังกัด</h3>`;
                 if (linkedFarmers.length > 0) {
-                    linkedHtml += linkedFarmers.map(f => `<div class="bg-gray-200 p-2 rounded">${f.farmerName}</div>`).join('');
+                    linkedHtml += linkedFarmers.map(f => `<div class="bg-gray-200 p-2 rounded">${f['ชื่อเกษตรกร']}</div>`).join('');
                 } else {
                     linkedHtml += `<p class="text-gray-500">ไม่มีข้อมูล</p>`;
                 }
@@ -541,7 +542,7 @@
 
             container.innerHTML = `<div class="bg-white p-4 rounded-lg shadow-sm">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">${data.storeName || data.farmerName}</h2>
+                    <h2 class="text-2xl font-bold">${data['ชื่อร้านค้า'] || data['ชื่อเกษตรกร']}</h2>
                     <button onclick='handleEditClick(${JSON.stringify(data)})' class="text-blue-500 hover:text-blue-700 text-lg"><i class="fas fa-pencil-alt"></i></button>
                 </div>
                 ${detailsHtml}${linkedHtml}
@@ -550,10 +551,7 @@
         
         // --- Dashboard Functionality ---
         function initDashboard() {
-            if (allData.length === 0) {
-                // Data is fetched on initializeApp, so we just need to render
-                return;
-            }
+            if (allData.length === 0) return;
             document.getElementById('store-count').textContent = allData.filter(d => d.formType === 'ร้านค้า').length;
             document.getElementById('farmer-count').textContent = allData.filter(d => d.formType === 'เกษตรกร').length;
             initDashboardCharts();
@@ -586,13 +584,13 @@
 
         function plotDataOnMap() {
             allData.forEach(item => {
-                const gps = item.gps || item.plotGps;
+                const gps = item['GPS'] || item['GPSแปลง'];
                 if (gps && gps.includes(',')) {
                     const [lat, lon] = gps.split(',').map(s => parseFloat(s.trim()));
                     if (!isNaN(lat) && !isNaN(lon)) {
                         const isStore = item.formType === 'ร้านค้า';
                         const isTrial = item.formType === 'แปลงทดลอง';
-                        const name = item.storeName || item.farmerName || item.trialFarmerName || 'N/A';
+                        const name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['ชื่อเจ้าของสวน'] || 'N/A';
                         const iconColor = isStore ? 'blue' : (isTrial ? 'violet' : 'green');
                         const markerIcon = new L.Icon({ iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${iconColor}.png`, shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] });
                         const popupContent = `<b>${name}</b><br><a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}" target="_blank" class="text-blue-600 font-bold">นำทาง</a>`;
