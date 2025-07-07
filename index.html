@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="th" class="">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Advance Fertilizer 2.0</title>
+    <title>Advance Fertilizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -11,38 +11,18 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body { font-family: 'Sarabun', sans-serif; background-color: #f4f5f7; transition: background-color 0.3s ease; }
+        body { font-family: 'Sarabun', sans-serif; background-color: #f4f5f7; }
         .view { display: none !important; }
         .view.active { display: grid !important; }
         #main-app-view.active { display: block !important; }
         #login-view.active { display: grid !important; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .dark body { background-color: #111827; }
-        .dark .bg-white { background-color: #1f2937; }
-        .dark .bg-gray-50 { background-color: #374151; }
-        .dark .bg-gray-200 { background-color: #374151; }
-        .dark .border-b, .dark .border-t { border-color: #374151; }
-        .dark .text-gray-800 { color: #f9fafb; }
-        .dark .text-gray-600 { color: #d1d5db; }
-        .dark .text-gray-500 { color: #9ca3af; }
-        .dark .text-gray-400 { color: #6b7280; }
-        .dark .form-input, .dark .form-select, .dark .form-textarea { background-color: #374151; border-color: #4b5563; color: #f9fafb; }
-        .dark .tab-button[data-active='true'] { background-color: #374151; }
-        .dark #header-title { color: #f9fafb; }
+        .page-content, .tab-content { display: none; }
+        .page-content.active, .tab-content.active { display: block; }
         .bottom-nav-item[data-active='true'] { color: #ec4899; }
         .tab-button[data-active='true'] { color: #ec4899; background-color: #fff; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); font-weight: 700; }
         .form-input, .form-select, .form-textarea { width: 100%; background-color: #fff; border: 1px solid #d1d5db; border-radius: 0.5rem; padding: 0.75rem; font-size: 1rem; transition: all 0.2s; }
         .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #ec4899; box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.4); }
         .form-label { display: block; font-weight: 500; color: #374151; margin-bottom: 0.5rem; }
-        .dark .form-label { color: #d1d5db; }
-        .page-content { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
-        .page-content.active { display: block; opacity: 1; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .list-item-animation { animation: fadeInUp 0.4s ease-out forwards; opacity: 0; }
-        .skeleton { background-color: #e5e7eb; border-radius: 0.5rem; animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        .dark .skeleton { background-color: #374151; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
 </head>
 <body class="overscroll-none">
@@ -61,13 +41,10 @@
 
     <div id="main-app-view" class="view">
         <div class="flex flex-col h-screen">
-            <header class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-20">
+            <header class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-10">
                 <button id="back-button" class="hidden text-xl text-gray-600 w-8 text-left"><i class="fas fa-chevron-left"></i></button>
                 <h1 id="header-title" class="text-xl font-bold text-gray-800 text-center flex-grow">ภาพรวม</h1>
-                <div class="flex items-center space-x-4">
-                    <button id="theme-toggle" class="text-xl text-gray-600 w-8"><i class="fas fa-moon"></i></button>
-                    <button id="logout-button" class="text-xl text-gray-600 w-8 text-right"><i class="fas fa-sign-out-alt"></i></button>
-                </div>
+                <button id="logout-button" class="text-xl text-gray-600 w-8 text-right"><i class="fas fa-sign-out-alt"></i></button>
             </header>
             
             <main class="flex-1 overflow-y-auto p-4 pb-24">
@@ -76,38 +53,13 @@
                         <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">ร้านค้า</p><p id="store-count" class="text-3xl font-bold text-blue-500">0</p></div>
                         <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">เกษตรกร</p><p id="farmer-count" class="text-3xl font-bold text-green-500">0</p></div>
                     </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm"><h3 class="font-bold mb-2 text-center text-gray-800">สัดส่วนข้อมูล</h3><div class="max-w-xs mx-auto"><canvas id="doughnutChart"></canvas></div></div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm"><h3 class="font-bold mb-2 text-center">สัดส่วนข้อมูล</h3><div class="max-w-xs mx-auto"><canvas id="doughnutChart"></canvas></div></div>
                 </div>
                 <div id="feed-page" class="page-content">
                     <div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold text-gray-800">ข้อมูลลูกค้า</h1><button onclick="showAddFormSelection()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><i class="fas fa-plus"></i><span>เพิ่ม</span></button></div>
                     <div class="p-1 bg-gray-200 rounded-lg flex space-x-1 mb-4"><button onclick="showTab('stores')" class="tab-button w-1/3 py-2 rounded-md" data-active="true">ร้านค้า</button><button onclick="showTab('farmers')" class="tab-button w-1/3 py-2 rounded-md">เกษตรกร</button><button onclick="showTab('trials')" class="tab-button w-1/3 py-2 rounded-md">แปลงทดลอง</button></div>
                     <div class="relative mb-4"><input id="search-input" type="text" placeholder="ค้นหาด้วยชื่อ..." class="form-input pl-10"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i></div>
-                    
-                    <div id="filter-sort-controls" class="hidden bg-gray-50 p-2 rounded-lg mb-4 space-y-2 md:space-y-0 md:flex md:items-center md:space-x-4">
-                        <div class="flex-1">
-                            <label class="text-sm font-medium text-gray-500">กรองตามสถานะ:</label>
-                            <select id="filter-select" class="form-select text-sm p-2">
-                                <option value="all">ทั้งหมด</option>
-                                <option value="ร้านใหม่">ร้านใหม่</option>
-                                <option value="ร้านเก่า">ร้านเก่า</option>
-                            </select>
-                        </div>
-                        <div class="flex-1">
-                            <label class="text-sm font-medium text-gray-500">จัดเรียง:</label>
-                            <select id="sort-select" class="form-select text-sm p-2">
-                                <option value="newest">ใหม่สุด</option>
-                                <option value="oldest">เก่าสุด</option>
-                                <option value="az">ชื่อ (A-Z)</option>
-                                <option value="za">ชื่อ (Z-A)</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div id="feed-container">
-                        <div id="skeleton-loader" class="space-y-3">
-                            <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4"><div class="skeleton w-8 h-8 rounded-full"></div><div class="flex-1 space-y-2"><div class="skeleton h-4 w-3/4"></div><div class="skeleton h-3 w-1/2"></div></div></div>
-                            <div class="bg-white p-4 rounded-lg shadow-sm flex items-center space-x-4"><div class="skeleton w-8 h-8 rounded-full"></div><div class="flex-1 space-y-2"><div class="skeleton h-4 w-2/3"></div><div class="skeleton h-3 w-1/3"></div></div></div>
-                        </div>
                         <div id="stores-tab" class="tab-content active space-y-3"></div>
                         <div id="farmers-tab" class="tab-content space-y-3"></div>
                         <div id="trials-tab" class="tab-content space-y-3"></div>
@@ -131,22 +83,7 @@
     <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex flex-col items-center justify-center text-white"><i class="fas fa-spinner fa-spin text-4xl"></i><p id="loading-text" class="mt-4 text-lg">กำลังโหลดข้อมูล...</p></div>
 
     <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeToggleIcon = themeToggle.querySelector('i');
-        const applyTheme = (theme) => {
-            document.documentElement.classList.toggle('dark', theme === 'dark');
-            themeToggleIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        };
-        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        applyTheme(savedTheme);
-        themeToggle.addEventListener('click', () => {
-            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
-        });
-
         let currentUser = null, allData = [], map = null, doughnutChartInstance = null;
-        let currentSort = 'newest', currentFilter = 'all';
         const loginView = document.getElementById('login-view');
         const mainAppView = document.getElementById('main-app-view');
         const formModal = document.getElementById('form-modal');
@@ -156,12 +93,8 @@
         const searchInput = document.getElementById('search-input');
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingText = document.getElementById('loading-text');
-        const filterControls = document.getElementById('filter-sort-controls');
-        const filterSelect = document.getElementById('filter-select');
-        const sortSelect = document.getElementById('sort-select');
-        const skeletonLoader = document.getElementById('skeleton-loader');
         const emptyFeed = document.getElementById('empty-feed');
-        
+
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWYuttyt5bFw3h7jzUhEaWBpowkLikqILd5kaL0V6b_jveMP1Tdpd1gPGqJmqexcLS1g/exec';
 
         async function apiCall(payload, loadingMessage = null) {
@@ -228,32 +161,26 @@
         }
         
         function showPage(pageName, detailData = null) {
-            const currentPage = document.querySelector('.page-content.active');
-            if (currentPage) { currentPage.classList.remove('active'); }
-            setTimeout(() => {
-                document.querySelectorAll('.page-content').forEach(p => p.style.display = 'none');
-                const newPage = document.getElementById(`${pageName}-page`);
-                newPage.style.display = 'block';
-                void newPage.offsetWidth; 
-                newPage.classList.add('active');
-                document.querySelectorAll('.bottom-nav-item').forEach(item => { item.dataset.active = item.getAttribute('onclick').includes(`'${pageName}'`); });
-                document.getElementById('header-title').textContent = { dashboard: 'ภาพรวม', feed: 'ข้อมูลลูกค้า', map: 'แผนที่', detail: 'รายละเอียด' }[pageName] || 'ภาพรวม';
-                backButton.classList.toggle('hidden', pageName !== 'detail');
-                if (pageName === 'detail') renderDetailPage(detailData);
-                if (pageName === 'dashboard') initDashboard();
-                if (pageName === 'feed') {
-                    const activeTab = document.querySelector('.tab-button[data-active="true"]')?.getAttribute('onclick').match(/'(.*?)'/)[1] || 'stores';
-                    showTab(activeTab);
-                }
-                if (pageName === 'map') initMap();
-            }, 200);
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.getElementById(`${pageName}-page`).classList.add('active');
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.dataset.active = item.getAttribute('onclick').includes(`'${pageName}'`);
+            });
+            document.getElementById('header-title').textContent = { dashboard: 'ภาพรวม', feed: 'ข้อมูลลูกค้า', map: 'แผนที่', detail: 'รายละเอียด' }[pageName] || 'ภาพรวม';
+            backButton.classList.toggle('hidden', pageName !== 'detail');
+            if (pageName === 'detail') renderDetailPage(detailData);
+            if (pageName === 'dashboard') initDashboard();
+            if (pageName === 'feed') {
+                const activeTab = document.querySelector('.tab-button[data-active="true"]')?.getAttribute('onclick').match(/'(.*?)'/)[1] || 'stores';
+                showTab(activeTab);
+            }
+            if (pageName === 'map') initMap();
         }
 
         function showTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(`${tabName}-tab`).classList.add('active');
             document.querySelectorAll('.tab-button').forEach(b => b.dataset.active = b.getAttribute('onclick').includes(`'${tabName}'`));
-            filterControls.style.display = (tabName === 'stores') ? 'block' : 'none';
             renderAllTabs();
         }
 
@@ -273,14 +200,11 @@
         function closeFormModal() { formModal.classList.add('hidden'); }
         
         function generateForm(type, data = {}) {
-            const isEdit = Object.keys(data).length > 0 && type !== 'activity';
+            const isEdit = Object.keys(data).length > 0;
             let html = '';
             let title = '';
             let formType = '';
             const safeVal = (key) => data[key] || '';
-
-            const createGpsInput = (name, value) => `<div class="md:col-span-2"><label class="form-label">GPS</label><div class="flex"><input name="${name}" id="gps-input" class="form-input rounded-r-none" value="${value}"><button type="button" onclick="getGeoLocation(this)" class="bg-blue-500 hover:bg-blue-600 text-white px-4 rounded-r-lg transition-colors w-20"><i class="fas fa-map-marker-alt"></i></button></div></div>`;
-            const createImageUploadInput = (label, fieldName, existingImages = '') => `<div class="md:col-span-2"><label class="form-label">${label}</label><input data-target-field="${fieldName}" id="image-upload-input-${fieldName.replace(/\s/g, '')}" type="file" class="form-input image-upload-input" multiple accept="image/*"><input type="hidden" name="${fieldName}" id="image-urls-hidden-${fieldName.replace(/\s/g, '')}" value="${existingImages}"><div id="image-preview-container-${fieldName.replace(/\s/g, '')}" class="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4"></div></div>`;
 
             if (type === 'store') {
                 title = isEdit ? 'แก้ไขข้อมูลร้านค้า' : 'เพิ่มข้อมูลร้านค้า';
@@ -288,7 +212,7 @@
                 html = `<div class="p-6 overflow-y-auto"><h3 class="text-xl font-bold mb-6 border-b pb-4">ข้อมูลร้านค้า</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div><label class="form-label">ชื่อร้านค้า</label><input name="ชื่อร้านค้า" class="form-input" required value="${safeVal('ชื่อร้านค้า')}"></div>
                     <div><label class="form-label">สถานะ</label><select name="สถานะ" class="form-select"><option ${safeVal('สถานะ') === 'ร้านเก่า' ? 'selected' : ''}>ร้านเก่า</option><option ${safeVal('สถานะ') === 'ร้านใหม่' ? 'selected' : ''}>ร้านใหม่</option></select></div>
-                    ${createGpsInput('GPS', safeVal('GPS'))}
+                    <div class="md:col-span-2"><label class="form-label">GPS</label><div class="flex"><input name="GPS" id="gps-input" class="form-input rounded-r-none" value="${safeVal('GPS')}"><button type="button" onclick="getGeoLocation('gps-input')" class="bg-blue-500 text-white px-4 rounded-r-lg"><i class="fas fa-map-marker-alt"></i></button></div></div>
                     <div><label class="form-label">ขนาดร้านค้า</label><input name="ขนาดร้านค้า" class="form-input" value="${safeVal('ขนาดร้านค้า')}"></div>
                     <div><label class="form-label">เปิดมากี่ปี</label><input name="เปิดมากี่ปี" type="number" class="form-input" value="${safeVal('เปิดมากี่ปี')}"></div>
                     <div><label class="form-label">สินค้าหลัก</label><input name="สินค้าหลัก" class="form-input" value="${safeVal('สินค้าหลัก')}"></div>
@@ -314,13 +238,7 @@
                     <div><label class="form-label">กีฬาที่ชอบ</label><input name="กีฬาที่ชอบ" class="form-input" value="${safeVal('กีฬาที่ชอบ')}"></div>
                     <div class="md:col-span-2"><label class="form-label">เป็นคนประเภทใด</label><select name="เป็นคนประเภทใด" class="form-select"><option ${safeVal('เป็นคนประเภทใด') === 'ชอบเจ๊าะแจ๊ะ' ? 'selected' : ''}>ชอบเจ๊าะแจ๊ะ</option><option ${safeVal('เป็นคนประเภทใด') === 'ชอบข้อมูล' ? 'selected' : ''}>ชอบข้อมูล</option><option ${safeVal('เป็นคนประเภทใด') === 'ชอบทดลอง' ? 'selected' : ''}>ชอบทดลอง</option><option ${safeVal('เป็นคนประเภทใด') === 'ชอบต่อราคา' ? 'selected' : ''}>ชอบต่อราคา</option></select></div>
                     <div class="md:col-span-2"><label class="form-label">แนวคิดการตลาดปุ๋ย</label><textarea name="แนวคิดการตลาดปุ๋ย" class="form-textarea h-24">${safeVal('แนวคิดการตลาดปุ๋ย')}</textarea></div>
-                </div>
-                <h3 class="text-xl font-bold mt-8 mb-6 border-b pb-4">รูปภาพ</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    ${createImageUploadInput('รูปร้าน', 'รูปร้าน', safeVal('รูปร้าน'))}
-                    ${createImageUploadInput('รูปเจ้าของร้าน', 'รูปเจ้าของร้าน', safeVal('รูปเจ้าของร้าน'))}
-                </div>
-                </div>`;
+                </div></div>`;
             } else if (type === 'farmer') {
                 const stores = allData.filter(d => d.formType === 'ร้านค้า');
                 const storeOptions = stores.map(s => `<option value="${s['ชื่อร้านค้า']}" ${safeVal('ร้านค้าในสังกัด') === s['ชื่อร้านค้า'] ? 'selected' : ''}>${s['ชื่อร้านค้า']}</option>`).join('');
@@ -330,7 +248,6 @@
                     <div><label class="form-label">ชื่อเกษตรกร</label><input name="ชื่อเกษตรกร" class="form-input" required value="${safeVal('ชื่อเกษตรกร')}"></div>
                     <div><label class="form-label">ร้านค้าในสังกัด</label><select name="ร้านค้าในสังกัด" class="form-select"><option value="">-- ไม่ระบุ --</option>${storeOptions}</select></div>
                     <div><label class="form-label">เบอร์โทรเกษตรกร</label><input name="เบอร์โทรเกษตรกร" class="form-input" value="${safeVal('เบอร์โทรเกษตรกร')}"></div>
-                    ${createGpsInput('GPS', safeVal('GPS'))}
                     <div class="md:col-span-2"><label class="form-label">ที่อยู่เกษตรกร</label><textarea name="ที่อยู่เกษตรกร" class="form-textarea">${safeVal('ที่อยู่เกษตรกร')}</textarea></div>
                     <div><label class="form-label">เพศเกษตรกร</label><select name="เพศเกษตรกร" class="form-select"><option ${safeVal('เพศเกษตรกร') === 'ชาย' ? 'selected' : ''}>ชาย</option><option ${safeVal('เพศเกษตรกร') === 'หญิง' ? 'selected' : ''}>หญิง</option></select></div>
                     <div><label class="form-label">อายุเกษตรกร</label><input name="อายุเกษตรกร" type="number" class="form-input" value="${safeVal('อายุเกษตรกร')}"></div>
@@ -342,12 +259,7 @@
                     <div><label class="form-label">ลักษณะตัวตนในพื้นที่</label><input name="ลักษณะตัวตนในพื้นที่" class="form-input" value="${safeVal('ลักษณะตัวตนในพื้นที่')}"></div>
                     <div class="md:col-span-2"><label class="form-label">ความคิดเรื่องปุ๋ยอินทรีย์</label><textarea name="ความคิดเรื่องปุ๋ยอินทรีย์" class="form-textarea">${safeVal('ความคิดเรื่องปุ๋ยอินทรีย์')}</textarea></div>
                     <div class="md:col-span-2"><label class="form-label">อาชีพอื่นๆ</label><input name="อาชีพอื่นๆ" class="form-input" value="${safeVal('อาชีพอื่นๆ')}"></div>
-                </div>
-                <h3 class="text-xl font-bold mt-8 mb-6 border-b pb-4">รูปภาพ</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    ${createImageUploadInput('รูปเกษตรกร', 'รูปเกษตรกร', safeVal('รูปเกษตรกร'))}
-                </div>
-                </div>`;
+                </div></div>`;
             } else if (type === 'trial') {
                 const farmers = allData.filter(d => d.formType === 'เกษตรกร');
                 const farmerOptions = farmers.map(f => `<option value="${f['ชื่อเกษตรกร']}" ${safeVal('เกษตรกรเจ้าของแปลง') === f['ชื่อเกษตรกร'] ? 'selected' : ''}>${f['ชื่อเกษตรกร']}</option>`).join('');
@@ -380,18 +292,6 @@
                     <div><label class="form-label">การเปลี่ยนแปลงของพืช</label><input name="การเปลี่ยนแปลงของพืช" class="form-input" value="${safeVal('การเปลี่ยนแปลงของพืช')}"></div>
                     <div class="md:col-span-2"><label class="form-label">โอกาสที่จะซื้อ</label><input name="โอกาสที่จะซื้อ" class="form-input" value="${safeVal('โอกาสที่จะซื้อ')}"></div>
                 </div>
-                <h3 class="text-xl font-bold mt-8 mb-6 border-b pb-4">รูปภาพ</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    ${createImageUploadInput('รูปแปลง', 'รูปแปลง', safeVal('รูปแปลง'))}
-                </div>
-                </div>`;
-            } else if (type === 'activity') {
-                title = 'บันทึกกิจกรรม';
-                formType = 'กิจกรรม';
-                html = `<div class="p-6 overflow-y-auto">
-                    <input type="hidden" name="parentId" value="${safeVal('parentId')}">
-                    <div><label class="form-label">ประเภทกิจกรรม</label><select name="ประเภท" class="form-select"><option>เข้าพบ</option><option>โทรศัพท์</option><option>ส่งของ</option><option>อื่นๆ</option></select></div>
-                    <div class="mt-4"><label class="form-label">รายละเอียด</label><textarea name="รายละเอียด" class="form-textarea h-32" required></textarea></div>
                 </div>`;
             }
 
@@ -405,11 +305,6 @@
                 </form>
             `;
             formModal.classList.remove('hidden');
-            
-            document.querySelectorAll('.image-upload-input').forEach(input => {
-                input.addEventListener('change', handleImagePreview);
-                handleImagePreview({ target: input });
-            });
         }
         
         function getGeoLocation(buttonEl) {
@@ -448,58 +343,6 @@
             }
         }
 
-        function handleImagePreview(event) {
-            const imageInput = event.target;
-            const fieldName = imageInput.dataset.targetField;
-            const previewContainer = document.getElementById(`image-preview-container-${fieldName.replace(/\s/g, '')}`);
-            const urlsHiddenInput = document.getElementById(`image-urls-hidden-${fieldName.replace(/\s/g, '')}`);
-            if (!previewContainer) return;
-            previewContainer.innerHTML = '';
-            const existingUrls = urlsHiddenInput.value ? urlsHiddenInput.value.split(',').filter(Boolean) : [];
-            existingUrls.forEach(url => {
-                const imgWrapper = document.createElement('div');
-                imgWrapper.className = 'relative';
-                imgWrapper.innerHTML = `<a href="${url}" target="_blank"><img src="${url}" class="w-full h-24 object-cover rounded-lg shadow-md"></a><button type="button" onclick="removeImage(this, '${url}', '${fieldName}')" class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">&times;</button>`;
-                previewContainer.appendChild(imgWrapper);
-            });
-            if (imageInput.files.length > 0) {
-                Array.from(imageInput.files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const imgWrapper = document.createElement('div');
-                        imgWrapper.className = 'relative';
-                        imgWrapper.innerHTML = `<img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg shadow-md opacity-75"><div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white text-xs">รออัปโหลด</div>`;
-                        previewContainer.appendChild(imgWrapper);
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-        }
-        
-        function removeImage(buttonEl, urlToRemove, fieldName) {
-            const urlsHiddenInput = document.getElementById(`image-urls-hidden-${fieldName.replace(/\s/g, '')}`);
-            let urls = urlsHiddenInput.value.split(',');
-            urls = urls.filter(url => url !== urlToRemove);
-            urlsHiddenInput.value = urls.join(',');
-            buttonEl.parentElement.remove();
-        }
-
-        async function uploadFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => {
-                    apiCall({ action: 'uploadFile', fileName: file.name, mimeType: file.type, data: reader.result.split(',')[1] })
-                        .then(response => {
-                            if (response.result === 'success' && response.url) { resolve(response.url); } 
-                            else { reject(new Error(response.message || 'File upload failed')); }
-                        })
-                        .catch(reject);
-                };
-                reader.onerror = error => reject(error);
-            });
-        }
-
         async function handleFormSubmit(e) {
             e.preventDefault();
             const form = e.target;
@@ -509,34 +352,7 @@
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
             
-            const imageInputs = form.querySelectorAll('.image-upload-input');
-            for (const imageInput of imageInputs) {
-                const fieldName = imageInput.dataset.targetField;
-                const filesToUpload = Array.from(imageInput.files);
-                let uploadedImageUrls = [];
-                if (filesToUpload.length > 0) {
-                    loadingText.textContent = `กำลังอัปโหลด 0/${filesToUpload.length}...`;
-                    loadingOverlay.classList.remove('hidden');
-                    try {
-                        for (let i = 0; i < filesToUpload.length; i++) {
-                            loadingText.textContent = `กำลังอัปโหลด ${i + 1}/${filesToUpload.length}...`;
-                            const url = await uploadFile(filesToUpload[i]);
-                            uploadedImageUrls.push(url);
-                        }
-                    } catch (error) {
-                        showMessageModal(`เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ: ${error.message}`);
-                        submitButton.innerHTML = 'บันทึก';
-                        submitButton.disabled = false;
-                        loadingOverlay.classList.add('hidden');
-                        return;
-                    }
-                }
-                const hiddenInput = form.querySelector(`#image-urls-hidden-${fieldName.replace(/\s/g, '')}`);
-                const existingImageUrls = hiddenInput ? hiddenInput.value : '';
-                data[fieldName] = [...existingImageUrls.split(','), ...uploadedImageUrls].filter(Boolean).join(',');
-            }
-
-            const isEdit = data.rowId && data.rowId !== '' && data.formType !== 'กิจกรรม';
+            const isEdit = data.rowId && data.rowId !== '';
             const payload = { action: isEdit ? 'updateData' : 'saveData', payload: data, user: currentUser };
             try {
                 const response = await apiCall(payload, "กำลังบันทึกข้อมูล...");
@@ -552,16 +368,14 @@
             } finally {
                 submitButton.innerHTML = isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มข้อมูล';
                 submitButton.disabled = false;
-                loadingOverlay.classList.add('hidden');
             }
         }
 
         async function fetchData(force = false) {
             if (!currentUser) return;
             if (allData.length > 0 && !force) { renderAllTabs(); return; }
-            skeletonLoader.style.display = 'block';
-            document.querySelectorAll('.tab-content').forEach(el => el.innerHTML = '');
-            emptyFeed.classList.add('hidden');
+            emptyFeed.textContent = 'กำลังโหลดข้อมูล...';
+            emptyFeed.classList.remove('hidden');
             try {
                 const response = await apiCall({ action: 'getData', username: currentUser.username, role: currentUser.role, team: currentUser.team || '' });
                 if(response.result === 'success' && Array.isArray(response.data)) {
@@ -572,9 +386,6 @@
             } catch (error) {
                 console.error('Error fetching data:', error);
                 emptyFeed.textContent = 'ไม่สามารถโหลดข้อมูลได้';
-                emptyFeed.classList.remove('hidden');
-            } finally {
-                skeletonLoader.style.display = 'none';
             }
         }
         
@@ -586,37 +397,32 @@
 
         function renderDataList(tabId) {
             const container = document.getElementById(`${tabId}-tab`);
+            if(!container) return;
+            
             const formTypeMapping = { stores: 'ร้านค้า', farmers: 'เกษตรกร', trials: 'แปลงทดลอง' };
             const formType = formTypeMapping[tabId];
             const searchTerm = searchInput.value.toLowerCase();
-            let filteredData = allData.filter(item => {
+            const data = allData.filter(item => {
                 if (item.formType !== formType) return false;
                 const name = String(item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || item['พืชที่ทดลอง'] || '');
                 return name.toLowerCase().includes(searchTerm);
             });
-            if (formType === 'ร้านค้า') {
-                if (currentFilter !== 'all') { filteredData = filteredData.filter(item => item['สถานะ'] === currentFilter); }
-                filteredData.sort((a, b) => {
-                    const nameA = a['ชื่อร้านค้า'] || '';
-                    const nameB = b['ชื่อร้านค้า'] || '';
-                    switch (currentSort) {
-                        case 'newest': return new Date(b.createdDate) - new Date(a.createdDate);
-                        case 'oldest': return new Date(a.createdDate) - new Date(b.createdDate);
-                        case 'az': return nameA.localeCompare(nameB, 'th');
-                        case 'za': return nameB.localeCompare(nameA, 'th');
-                        default: return 0;
-                    }
-                });
-            } else { filteredData.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate)); }
+            
             container.innerHTML = '';
-            if (filteredData.length === 0) { container.innerHTML = `<p class="text-center text-gray-500 py-10">ไม่มีข้อมูล</p>`; return; }
-            filteredData.forEach((item, index) => {
+
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-500 py-10">ไม่มีข้อมูล</p>`;
+                return;
+            }
+
+            data.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+
+            data.forEach((item, index) => {
                 const name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || item['พืชที่ทดลอง'] || 'N/A';
                 const subtext = item['ชื่อเจ้าของ'] || item['ปลูกอะไร'] || `โดย: ${item.createdBy}`;
                 const iconClass = { 'ร้านค้า': 'fa-store text-blue-500', 'เกษตรกร': 'fa-leaf text-green-500', 'แปลงทดลอง': 'fa-vial text-purple-500' }[item.formType] || 'fa-question-circle';
                 const row = document.createElement('div');
-                row.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 list-item-animation';
-                row.style.animationDelay = `${index * 50}ms`;
+                row.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-100';
                 row.onclick = () => showPage("detail", item);
                 row.innerHTML = `<div class="flex items-center space-x-4 overflow-hidden"><i class="fas ${iconClass} text-xl w-6 text-center"></i><div class="overflow-hidden"><p class="font-semibold text-gray-800 truncate">${name}</p><p class="text-sm text-gray-500 truncate">${subtext}</p></div></div><i class="fas fa-chevron-right text-gray-400"></i>`;
                 container.appendChild(row);
@@ -631,27 +437,14 @@
         function renderDetailPage(data) {
             const container = document.getElementById('detail-page');
             container.innerHTML = '';
-            let detailsHtml = '', linkedHtml = '', galleryHtml = '';
+            let detailsHtml = '', linkedHtml = '';
             const mainName = data['ชื่อร้านค้า'] || data['ชื่อเกษตรกร'] || data['เกษตรกรเจ้าของแปลง'] || 'รายละเอียด';
             
-            const fieldsToExclude = ['formType', 'rowId', 'sheetRow', 'รูปร้าน', 'รูปเจ้าของร้าน', 'รูปเกษตรกร', 'รูปแปลง'];
+            const fieldsToExclude = ['formType', 'rowId', 'sheetRow'];
             for (const [key, value] of Object.entries(data)) {
                 if (value && !fieldsToExclude.some(k => key.startsWith(k)) && !key.startsWith('creator')) {
                     detailsHtml += `<div class="flex justify-between py-3 border-b"><span class="text-gray-500 w-1/3 break-words">${key}</span><span class="font-semibold text-right w-2/3 break-words">${value}</span></div>`;
                 }
-            }
-
-            const allImageUrls = [
-                ...(data['รูปร้าน'] ? data['รูปร้าน'].split(',') : []),
-                ...(data['รูปเจ้าของร้าน'] ? data['รูปเจ้าของร้าน'].split(',') : []),
-                ...(data['รูปเกษตรกร'] ? data['รูปเกษตรกร'].split(',') : []),
-                ...(data['รูปแปลง'] ? data['รูปแปลง'].split(',') : [])
-            ].filter(Boolean);
-
-            if (allImageUrls.length > 0) {
-                galleryHtml += `<h3 class="text-lg font-bold mt-6 mb-2 border-t pt-4">แกลเลอรีรูปภาพ</h3><div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">`;
-                allImageUrls.forEach(url => { galleryHtml += `<a href="${url}" target="_blank"><img src="${url}" class="w-full h-24 object-cover rounded-lg shadow-md hover:opacity-80 transition-opacity"></a>`; });
-                galleryHtml += `</div>`;
             }
 
             if (data.formType === 'ร้านค้า') {
@@ -665,33 +458,8 @@
                     linkedHtml += '</div>';
                 }
             }
-
-            const activityTabHtml = `<div class="mt-6 border-t pt-4"><div class="flex border-b"><button id="detail-tab-info" class="py-2 px-4 font-semibold border-b-2 border-pink-500 text-pink-500">รายละเอียด</button><button id="detail-tab-activity" class="py-2 px-4 font-semibold text-gray-500">กิจกรรม</button></div><div id="detail-content-info" class="mt-4">${detailsHtml}${galleryHtml}${linkedHtml}</div><div id="detail-content-activity" class="hidden mt-4 space-y-3"><button onclick="generateForm('activity', { parentId: '${data.rowId}' })" class="w-full bg-blue-500 text-white py-2 rounded-lg mb-4">เพิ่มบันทึกกิจกรรม</button><div id="activity-list"><p class="text-center text-gray-400">ยังไม่มีกิจกรรม</p></div></div></div>`;
             const dataString = JSON.stringify(data).replace(/"/g, '&quot;');
-            container.innerHTML = `<div class="bg-white p-4 rounded-lg shadow-sm"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-gray-800">${mainName}</h2>${data.formType !== 'กิจกรรม' ? `<button onclick='handleEditClick(JSON.parse(this.dataset.item))' data-item="${dataString}" class="text-blue-500 hover:text-blue-700 text-lg"><i class="fas fa-pencil-alt"></i></button>` : ''}</div>${activityTabHtml}</div>`;
-            const infoTab = document.getElementById('detail-tab-info');
-            const activityTab = document.getElementById('detail-tab-activity');
-            const infoContent = document.getElementById('detail-content-info');
-            const activityContent = document.getElementById('detail-content-activity');
-            const switchDetailTab = (active) => {
-                const isActiveInfo = active === 'info';
-                infoTab.classList.toggle('border-pink-500', isActiveInfo);
-                infoTab.classList.toggle('text-pink-500', isActiveInfo);
-                activityTab.classList.toggle('border-pink-500', !isActiveInfo);
-                activityTab.classList.toggle('text-pink-500', !isActiveInfo);
-                infoContent.classList.toggle('hidden', !isActiveInfo);
-                activityContent.classList.toggle('hidden', isActiveInfo);
-                if (!isActiveInfo) loadActivities(data.rowId);
-            };
-            infoTab.addEventListener('click', () => switchDetailTab('info'));
-            activityTab.addEventListener('click', () => switchDetailTab('activity'));
-        }
-
-        function loadActivities(parentId) {
-            const activityListContainer = document.getElementById('activity-list');
-            const activities = allData.filter(item => item.formType === 'กิจกรรม' && item.parentId === parentId).sort((a,b) => new Date(b.createdDate) - new Date(a.createdDate));
-            if (activities.length === 0) { activityListContainer.innerHTML = `<p class="text-center text-gray-400">ยังไม่มีกิจกรรม</p>`; return; }
-            activityListContainer.innerHTML = activities.map(act => `<div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg"><div class="flex justify-between items-center"><p class="font-semibold text-gray-800">${act['ประเภท']}</p><p class="text-xs text-gray-400">${new Date(act.createdDate).toLocaleDateString('th-TH')}</p></div><p class="text-sm text-gray-600 mt-1">${act['รายละเอียด']}</p><p class="text-xs text-gray-400 text-right mt-2">โดย: ${act.createdBy}</p></div>`).join('');
+            container.innerHTML = `<div class="bg-white p-4 rounded-lg shadow-sm"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-bold text-gray-800">${mainName}</h2><button onclick='handleEditClick(JSON.parse(this.dataset.item))' data-item="${dataString}" class="text-blue-500 hover:text-blue-700 text-lg"><i class="fas fa-pencil-alt"></i></button></div>${detailsHtml}${linkedHtml}</div>`;
         }
 
         function initDashboard() {
@@ -752,8 +520,6 @@
         document.getElementById('logout-button').addEventListener('click', handleLogout);
         backButton.addEventListener('click', () => showPage('feed'));
         searchInput.addEventListener('input', () => renderAllTabs());
-        filterSelect.addEventListener('change', (e) => { currentFilter = e.target.value; renderAllTabs(); });
-        sortSelect.addEventListener('change', (e) => { currentSort = e.target.value; renderAllTabs(); });
         
         checkSession();
     </script>
