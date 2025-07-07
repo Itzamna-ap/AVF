@@ -1,10 +1,8 @@
-const CACHE_NAME = 'advance-fertilizer-cache-v5'; // Updated version to force refresh
+const CACHE_NAME = 'advance-fertilizer-cache-v6'; // Updated version to force refresh
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json'
-  // We will no longer cache external CDN assets as they cause CORS issues.
-  // The browser will handle caching them.
 ];
 
 // Install event: caches core assets of our app.
