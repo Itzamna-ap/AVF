@@ -1,4 +1,4 @@
-const CACHE_NAME = 'advance-fertilizer-cache-v2';
+const CACHE_NAME = 'advance-fertilizer-cache-v4'; // Updated version to force refresh
 const urlsToCache = [
   './',
   './index.html',
@@ -12,35 +12,18 @@ const urlsToCache = [
   'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
 ];
 
+// Install event: caches core assets.
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache and caching core assets');
+        console.log('Service Worker: Caching core assets');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-self.addEventListener('fetch', event => {
-  // Ignore non-GET requests and requests to Google Apps Script
-  if (event.request.method !== 'GET' || event.request.url.includes('script.google.com')) {
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        // Return from cache if available
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        // Otherwise, fetch from network
-        return fetch(event.request);
-      })
-  );
-});
-
+// Activate event: removes old caches.
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -48,10 +31,40 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Service Worker: Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
+  );
+});
+
+// Fetch event: Defines how to handle requests.
+self.addEventListener('fetch', event => {
+  // Strategy: Network Only for API calls.
+  // This ensures data is always fresh.
+  if (event.request.url.includes('script.google.com')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Strategy: Cache First for all other (static asset) requests.
+  // This makes the app load fast.
+  event.respondWith(
+    caches.match(event.request)
+      .then(cachedResponse => {
+        // If the resource is in the cache, return it.
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        // Otherwise, fetch it from the network, cache it, and return it.
+        return fetch(event.request).then(networkResponse => {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        });
+      })
   );
 });
