@@ -13,9 +13,8 @@
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #f4f5f7; }
         .view { display: none !important; }
-        .view.active { display: grid !important; }
+        .view.active { display: flex !important; }
         #main-app-view.active { display: block !important; }
-        #login-view.active { display: grid !important; }
         .page-content, .tab-content { display: none; }
         .page-content.active, .tab-content.active { display: block; }
         .bottom-nav-item[data-active='true'] { color: #ec4899; }
@@ -27,8 +26,8 @@
 </head>
 <body class="overscroll-none">
 
-    <div id="login-view" class="view active place-items-center min-h-screen">
-        <div class="w-full max-w-sm p-8 space-y-6">
+    <div id="login-view" class="view active min-h-screen w-full items-center justify-center bg-gray-100">
+        <div class="w-full max-w-sm p-8 space-y-6 bg-white rounded-2xl shadow-lg">
             <div class="text-center"><img src="https://img5.pic.in.th/file/secure-sv1/428709424_3685682595091856_2231537038448980245_n.th.jpg" class="w-24 h-24 mx-auto rounded-full shadow-md" alt="App Logo"><h1 class="text-4xl font-bold text-gray-800 mt-4">Advance Fertilizer</h1><p class="text-gray-500">กรุณาเข้าสู่ระบบเพื่อดำเนินการต่อ</p></div>
             <form id="login-form" class="space-y-4">
                 <div><label for="username" class="form-label text-left">ชื่อผู้ใช้</label><input id="username" type="text" class="form-input"></div>
@@ -39,7 +38,7 @@
         </div>
     </div>
 
-    <div id="main-app-view" class="view">
+    <div id="main-app-view" class="view hidden">
         <div class="flex flex-col h-screen">
             <header class="bg-white border-b p-4 flex justify-between items-center sticky top-0 z-10">
                 <button id="back-button" class="hidden text-xl text-gray-600 w-8 text-left"><i class="fas fa-chevron-left"></i></button>
@@ -48,24 +47,8 @@
             </header>
             
             <main class="flex-1 overflow-y-auto p-4 pb-24">
-                <div id="dashboard-page" class="page-content">
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">ร้านค้า</p><p id="store-count" class="text-3xl font-bold text-blue-500">0</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">เกษตรกร</p><p id="farmer-count" class="text-3xl font-bold text-green-500">0</p></div>
-                    </div>
-                    <div class="bg-white p-4 rounded-lg shadow-sm"><h3 class="font-bold mb-2 text-center">สัดส่วนข้อมูล</h3><div class="max-w-xs mx-auto"><canvas id="doughnutChart"></canvas></div></div>
-                </div>
-                <div id="feed-page" class="page-content">
-                    <div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold text-gray-800">ข้อมูลลูกค้า</h1><button onclick="showAddFormSelection()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><i class="fas fa-plus"></i><span>เพิ่ม</span></button></div>
-                    <div class="p-1 bg-gray-200 rounded-lg flex space-x-1 mb-4"><button onclick="showTab('stores')" class="tab-button w-1/3 py-2 rounded-md" data-active="true">ร้านค้า</button><button onclick="showTab('farmers')" class="tab-button w-1/3 py-2 rounded-md">เกษตรกร</button><button onclick="showTab('trials')" class="tab-button w-1/3 py-2 rounded-md">แปลงทดลอง</button></div>
-                    <div class="relative mb-4"><input id="search-input" type="text" placeholder="ค้นหาด้วยชื่อ..." class="form-input pl-10"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i></div>
-                    <div id="feed-container">
-                        <div id="stores-tab" class="tab-content active space-y-3"></div>
-                        <div id="farmers-tab" class="tab-content space-y-3"></div>
-                        <div id="trials-tab" class="tab-content space-y-3"></div>
-                    </div>
-                    <p id="empty-feed" class="hidden text-center text-gray-500 py-10">ไม่มีข้อมูล</p>
-                </div>
+                <div id="dashboard-page" class="page-content"></div>
+                <div id="feed-page" class="page-content"></div>
                 <div id="detail-page" class="page-content"></div>
                 <div id="map-page" class="page-content"><div id="map" class="h-full w-full rounded-lg shadow-md min-h-[calc(100vh-160px)]"></div></div>
             </main>
@@ -90,10 +73,8 @@
         const formModalContainer = document.getElementById('form-modal-container');
         const loginForm = document.getElementById('login-form');
         const backButton = document.getElementById('back-button');
-        const searchInput = document.getElementById('search-input');
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingText = document.getElementById('loading-text');
-        const emptyFeed = document.getElementById('empty-feed');
 
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWYuttyt5bFw3h7jzUhEaWBpowkLikqILd5kaL0V6b_jveMP1Tdpd1gPGqJmqexcLS1g/exec';
 
@@ -128,11 +109,12 @@
                     initializeApp();
                 } else {
                     loginError.textContent = data.message || 'Username หรือ Password ไม่ถูกต้อง';
+                    submitButton.innerHTML = 'เข้าสู่ระบบ';
+                    submitButton.disabled = false;
                 }
             } catch (err) {
                 console.error("Login Fetch Error:", err);
                 loginError.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
-            } finally {
                 submitButton.innerHTML = 'เข้าสู่ระบบ';
                 submitButton.disabled = false;
             }
@@ -140,9 +122,9 @@
         
         async function initializeApp() {
             loginView.classList.remove('active');
-            loginView.classList.add('hidden'); // Hide login view
+            loginView.classList.add('hidden');
+            mainAppView.classList.remove('hidden');
             mainAppView.classList.add('active');
-            mainAppView.classList.remove('hidden'); // Show main app
             await fetchData(true);
             showPage('dashboard');
         }
@@ -160,31 +142,159 @@
             } else {
                 loginView.classList.add('active');
                 mainAppView.classList.remove('active');
+                mainAppView.classList.add('hidden');
             }
         }
         
         function showPage(pageName, detailData = null) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-            document.getElementById(`${pageName}-page`).classList.add('active');
+            const newPage = document.getElementById(`${pageName}-page`);
+            if(newPage) newPage.classList.add('active');
+            
             document.querySelectorAll('.bottom-nav-item').forEach(item => {
                 item.dataset.active = item.getAttribute('onclick').includes(`'${pageName}'`);
             });
+            
             document.getElementById('header-title').textContent = { dashboard: 'ภาพรวม', feed: 'ข้อมูลลูกค้า', map: 'แผนที่', detail: 'รายละเอียด' }[pageName] || 'ภาพรวม';
             backButton.classList.toggle('hidden', pageName !== 'detail');
+
+            if (pageName === 'dashboard') renderDashboard();
+            if (pageName === 'feed') renderFeedPage();
             if (pageName === 'detail') renderDetailPage(detailData);
-            if (pageName === 'dashboard') initDashboard();
-            if (pageName === 'feed') {
-                const activeTab = document.querySelector('.tab-button[data-active="true"]')?.getAttribute('onclick').match(/'(.*?)'/)[1] || 'stores';
-                showTab(activeTab);
-            }
             if (pageName === 'map') initMap();
         }
 
+        function renderDashboard() {
+            const page = document.getElementById('dashboard-page');
+            const storeCount = allData.filter(d => d.formType === 'ร้านค้า').length;
+            const farmerCount = allData.filter(d => d.formType === 'เกษตรกร').length;
+            page.innerHTML = `
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">ร้านค้า</p><p class="text-3xl font-bold text-blue-500">${storeCount}</p></div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center"><p class="text-sm text-gray-500">เกษตรกร</p><p class="text-3xl font-bold text-green-500">${farmerCount}</p></div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-sm"><h3 class="font-bold mb-2 text-center">สัดส่วนข้อมูล</h3><div class="max-w-xs mx-auto"><canvas id="doughnutChart"></canvas></div></div>`;
+            
+            if (doughnutChartInstance) doughnutChartInstance.destroy();
+            const doughnutCtx = document.getElementById('doughnutChart').getContext('2d');
+            doughnutChartInstance = new Chart(doughnutCtx, { type: 'doughnut', data: { labels: ['ร้านค้า', 'เกษตรกร', 'แปลงทดลอง'], datasets: [{ data: [storeCount, farmerCount, allData.filter(d => d.formType === 'แปลงทดลอง').length], backgroundColor: ['#3b82f6', '#22c55e', '#a855f7'], hoverOffset: 4 }] } });
+        }
+
+        function renderFeedPage() {
+            const page = document.getElementById('feed-page');
+            page.innerHTML = `
+                <div class="flex justify-between items-center mb-4"><h1 class="text-2xl font-bold text-gray-800">ข้อมูลลูกค้า</h1><button onclick="showAddFormSelection()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2"><i class="fas fa-plus"></i><span>เพิ่ม</span></button></div>
+                <div class="p-1 bg-gray-200 rounded-lg flex space-x-1 mb-4"><button onclick="showTab('stores')" class="tab-button w-1/3 py-2 rounded-md" data-active="true">ร้านค้า</button><button onclick="showTab('farmers')" class="tab-button w-1/3 py-2 rounded-md">เกษตรกร</button><button onclick="showTab('trials')" class="tab-button w-1/3 py-2 rounded-md">แปลงทดลอง</button></div>
+                <div class="relative mb-4"><input id="search-input" type="text" placeholder="ค้นหาด้วยชื่อ..." class="form-input pl-10"></div>
+                <div id="feed-container">
+                    <div id="stores-tab" class="tab-content active space-y-3"></div>
+                    <div id="farmers-tab" class="tab-content space-y-3"></div>
+                    <div id="trials-tab" class="tab-content space-y-3"></div>
+                </div>
+                <p id="empty-feed" class="hidden text-center text-gray-500 py-10">ไม่มีข้อมูล</p>`;
+            
+            document.getElementById('search-input').addEventListener('input', renderAllTabs);
+            showTab('stores');
+        }
+
         function showTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(b => b.dataset.active = b.getAttribute('onclick').includes(`'${tabName}'`));
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(`${tabName}-tab`).classList.add('active');
-            document.querySelectorAll('.tab-button').forEach(b => b.dataset.active = b.getAttribute('onclick').includes(`'${tabName}'`));
             renderAllTabs();
+        }
+
+        function renderAllTabs() {
+            renderDataList('stores');
+            renderDataList('farmers');
+            renderDataList('trials');
+        }
+
+        function renderDataList(tabId) {
+            const container = document.getElementById(`${tabId}-tab`);
+            if(!container) return;
+            
+            const formTypeMapping = { stores: 'ร้านค้า', farmers: 'เกษตรกร', trials: 'แปลงทดลอง' };
+            const formType = formTypeMapping[tabId];
+            const searchInputEl = document.getElementById('search-input');
+            const searchTerm = searchInputEl ? searchInputEl.value.toLowerCase() : '';
+            
+            const data = allData.filter(item => {
+                if (item.formType !== formType) return false;
+                const name = String(item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || item['พืชที่ทดลอง'] || '');
+                return name.toLowerCase().includes(searchTerm);
+            });
+            
+            container.innerHTML = '';
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-500 py-10">ไม่มีข้อมูล</p>`;
+                return;
+            }
+
+            data.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+
+            data.forEach((item) => {
+                const name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || 'N/A';
+                const subtext = item['ชื่อเจ้าของ'] || `โดย: ${item.createdBy}`;
+                const iconClass = { 'ร้านค้า': 'fa-store text-blue-500', 'เกษตรกร': 'fa-leaf text-green-500', 'แปลงทดลอง': 'fa-vial text-purple-500' }[item.formType] || 'fa-question-circle';
+                const row = document.createElement('div');
+                row.className = 'bg-white p-4 rounded-lg shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-100';
+                row.onclick = () => showPage("detail", item);
+                row.innerHTML = `<div class="flex items-center space-x-4 overflow-hidden"><i class="fas ${iconClass} text-xl w-6 text-center"></i><div class="overflow-hidden"><p class="font-semibold text-gray-800 truncate">${name}</p><p class="text-sm text-gray-500 truncate">${subtext}</p></div></div><i class="fas fa-chevron-right text-gray-400"></i>`;
+                container.appendChild(row);
+            });
+        }
+        
+        function renderDetailPage(data) {
+            const container = document.getElementById('detail-page');
+            let detailsHtml = '';
+            let linkedHtml = '';
+            const mainName = data['ชื่อร้านค้า'] || data['ชื่อเกษตรกร'] || data['เกษตรกรเจ้าของแปลง'] || 'รายละเอียด';
+            
+            for (const [key, value] of Object.entries(data)) {
+                if (value && !['formType', 'rowId', 'sheetRow'].some(k => key.startsWith(k)) && !key.startsWith('creator')) {
+                    detailsHtml += `<div class="flex justify-between py-3 border-b"><span class="text-gray-500 w-1/3 break-words">${key}</span><span class="font-semibold text-right w-2/3 break-words">${value}</span></div>`;
+                }
+            }
+
+            // ⭐ START: Linked Data Logic
+            if (data.formType === 'ร้านค้า') {
+                const linkedFarmers = allData.filter(f => f.formType === 'เกษตรกร' && f['ร้านค้าในสังกัด'] === data['ชื่อร้านค้า']);
+                if(linkedFarmers.length > 0) {
+                    linkedHtml += `<h3 class="text-lg font-bold mt-6 mb-2 border-t pt-4">เกษตรกรในสังกัด</h3><div class="space-y-2">`;
+                    linkedFarmers.forEach(farmer => {
+                        const farmerDataString = JSON.stringify(farmer).replace(/"/g, '&quot;');
+                        linkedHtml += `<button onclick='showPage("detail", JSON.parse(this.dataset.item))' data-item='${farmerDataString}' class="w-full text-left bg-gray-100 hover:bg-gray-200 p-3 rounded-lg flex justify-between items-center transition"><span><i class="fas fa-leaf text-green-500 mr-2"></i>${farmer['ชื่อเกษตรกร']}</span><i class="fas fa-chevron-right text-gray-400"></i></button>`;
+                    });
+                    linkedHtml += '</div>';
+                }
+            } else if (data.formType === 'เกษตรกร') {
+                const linkedTrials = allData.filter(t => t.formType === 'แปลงทดลอง' && t['เกษตรกรเจ้าของแปลง'] === data['ชื่อเกษตรกร']);
+                 if(linkedTrials.length > 0) {
+                    linkedHtml += `<h3 class="text-lg font-bold mt-6 mb-2 border-t pt-4">แปลงทดลอง</h3><div class="space-y-2">`;
+                    linkedTrials.forEach(trial => {
+                        const trialDataString = JSON.stringify(trial).replace(/"/g, '&quot;');
+                        linkedHtml += `<button onclick='showPage("detail", JSON.parse(this.dataset.item))' data-item='${trialDataString}' class="w-full text-left bg-gray-100 hover:bg-gray-200 p-3 rounded-lg flex justify-between items-center transition"><span><i class="fas fa-vial text-purple-500 mr-2"></i>${trial['พืชที่ทดลอง'] || 'แปลงทดลอง'}</span><i class="fas fa-chevron-right text-gray-400"></i></button>`;
+                    });
+                    linkedHtml += '</div>';
+                }
+            }
+            // ⭐ END: Linked Data Logic
+
+            const dataString = JSON.stringify(data).replace(/"/g, '&quot;');
+            container.innerHTML = `<div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">${mainName}</h2>
+                    <button onclick='handleEditClick(JSON.parse(this.dataset.item))' data-item="${dataString}" class="text-blue-500 hover:text-blue-700 text-lg"><i class="fas fa-pencil-alt"></i></button>
+                </div>
+                ${detailsHtml}
+                ${linkedHtml}
+            </div>`;
+        }
+        
+        function handleEditClick(data) {
+            const type = { 'ร้านค้า': 'store', 'เกษตรกร': 'farmer', 'แปลงทดลอง': 'trial' }[data.formType];
+            if (type) generateForm(type, data);
         }
 
         function showAddFormSelection() {
@@ -304,40 +414,31 @@
                     <input type="hidden" name="formType" value="${formType}">
                     <input type="hidden" name="rowId" value="${data.rowId || ''}">
                     ${html}
-                    <div class="p-6 mt-auto bg-gray-100 border-t"><button type="submit" class="w-full btn-primary font-bold py-3 rounded-lg">${isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มข้อมูล'}</button></div>
+                    <div class="p-6 mt-auto bg-gray-50 border-t"><button type="submit" class="w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 rounded-lg">${isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มข้อมูล'}</button></div>
                 </form>
             `;
             formModal.classList.remove('hidden');
             document.getElementById('data-form').addEventListener('submit', handleFormSubmit);
         }
         
-        function getGeoLocation(buttonEl) {
-            const inputEl = buttonEl.previousElementSibling;
+        function getGeoLocation(inputElId) {
+            const inputEl = document.getElementById(inputElId);
+            const buttonEl = inputEl.nextElementSibling;
             const originalHtml = buttonEl.innerHTML;
             buttonEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             buttonEl.disabled = true;
-            buttonEl.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-            buttonEl.classList.add('bg-yellow-500');
-            showMessageModal('กำลังระบุตำแหน่ง โปรดรอสักครู่...');
+            showMessageModal('กำลังระบุตำแหน่ง...');
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     pos => {
                         inputEl.value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
                         closeMessageModal();
-                        buttonEl.innerHTML = '<i class="fas fa-check"></i>';
-                        buttonEl.classList.replace('bg-yellow-500', 'bg-green-500');
-                        setTimeout(() => {
-                           buttonEl.innerHTML = originalHtml;
-                           buttonEl.classList.replace('bg-green-500', 'bg-blue-500');
-                           buttonEl.classList.add('hover:bg-blue-600');
-                           buttonEl.disabled = false;
-                        }, 2000);
+                        buttonEl.innerHTML = originalHtml;
+                        buttonEl.disabled = false;
                     },
                     err => {
                         showMessageModal(`เกิดข้อผิดพลาด: ${err.message}`);
                         buttonEl.innerHTML = originalHtml;
-                        buttonEl.classList.replace('bg-yellow-500', 'bg-blue-500');
-                        buttonEl.classList.add('hover:bg-blue-600');
                         buttonEl.disabled = false;
                     }
                 );
@@ -353,21 +454,19 @@
             const submitButton = form.querySelector('button[type="submit"]');
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             submitButton.disabled = true;
-            
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
             
             const isEdit = data.rowId && data.rowId !== '';
             const payload = { action: isEdit ? 'updateData' : 'saveData', payload: data, user: currentUser };
-            
             try {
                 const response = await apiCall(payload, "กำลังบันทึกข้อมูล...");
                 if (response.result === 'success') {
                     showMessageModal(isEdit ? 'แก้ไขข้อมูลสำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!');
                     closeFormModal();
                     await new Promise(resolve => setTimeout(resolve, 500));
-                    await initializeApp();
-                    navigate('customers');
+                    await fetchData(true);
+                    showPage('feed');
                 } else { throw new Error(response.message || 'Unknown error from server'); }
             } catch (error) {
                 console.error("Submit Error:", error);
@@ -380,100 +479,64 @@
 
         async function fetchData(force = false) {
             if (!currentUser) return;
-            if (allData.length > 0 && !force) { renderAllTabs(); return; }
-            
-            const feedContainer = document.getElementById('feed-container');
-            if(feedContainer) {
-                feedContainer.innerHTML = '<p class="text-center text-gray-500 py-10">กำลังโหลดข้อมูล...</p>';
+            if (allData.length > 0 && !force) {
+                renderAllTabs();
+                return;
             }
-
+            const emptyFeedEl = document.getElementById('empty-feed');
+            if(emptyFeedEl) {
+                emptyFeedEl.textContent = 'กำลังโหลดข้อมูล...';
+                emptyFeedEl.classList.remove('hidden');
+            }
             try {
                 const response = await apiCall({ action: 'getData', user: currentUser });
                 if(response.result === 'success' && Array.isArray(response.data)) {
                     allData = response.data;
-                    renderDashboard(); // Render dashboard first
-                    if(document.querySelector('.bottom-nav-item.active[onclick*="customers"]')) {
-                        renderCustomers(); // Then render customers if that's the active page
+                    renderDashboard();
+                    const currentPage = document.querySelector('.page-content.active')?.id.replace('-page','');
+                    if(currentPage === 'feed') {
+                       renderFeedPage();
                     }
                 } else { throw new Error(response.message || "Invalid data format from server"); }
             } catch (error) {
                 console.error('Error fetching data:', error);
-                if(feedContainer) feedContainer.innerHTML = `<p class="text-center text-red-500 py-10">ไม่สามารถโหลดข้อมูลได้</p>`;
+                if(emptyFeedEl) {
+                    emptyFeedEl.textContent = 'ไม่สามารถโหลดข้อมูลได้';
+                }
             }
         }
         
-        function renderAllTabs() {
-            const activeTabButton = document.querySelector('#feed-page .tab-button[data-active="true"]');
-            if (activeTabButton) {
-                const tabName = activeTabButton.getAttribute('onclick').match(/'(.*?)'/)[1];
-                renderDataList(tabName.slice(0, -1));
-            }
-        }
-
-        function renderDataList(formTypeSingular) {
-            const formTypePlural = { 'store': 'ร้านค้า', 'farmer': 'เกษตรกร', 'trial': 'แปลงทดลอง' }[formTypeSingular];
-            const container = document.getElementById('feed-container');
-            if(!container) return;
-
-            const data = allData.filter(item => item.formType === formTypePlural).sort((a,b) => new Date(b.createdDate) - new Date(a.createdDate));
-            let contentHtml = '';
-
-            if (data.length === 0) {
-                contentHtml = `<p class="text-center text-gray-500 py-10">ไม่มีข้อมูล</p>`;
-            } else {
-                contentHtml = data.map(item => {
-                    const name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || 'N/A';
-                    const subtext = item['ชื่อเจ้าของ'] || `โดย: ${item.createdBy}`;
-                    const iconClass = formTypeSingular === 'store' ? 'fa-store' : (formTypeSingular === 'farmer' ? 'fa-leaf' : 'fa-vial');
-                    return `
-                        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm flex items-center justify-between cursor-pointer" onclick='navigate("detail", ${JSON.stringify(item).replace(/'/g, "&apos;")})'>
-                            <div class="flex items-center space-x-4">
-                                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                    <i class="fas ${iconClass} text-pink-600 text-xl"></i>
-                                </div>
-                                <div><p class="font-bold text-gray-800">${name}</p><p class="text-sm text-gray-500">${subtext}</p></div>
-                            </div>
-                            <i class="fas fa-chevron-right text-gray-400"></i>
-                        </div>`;
-                }).join('');
-            }
-            container.innerHTML = `<div class="space-y-3">${contentHtml}</div>`;
-        }
-        
-        function handleEditClick(data) {
-            const type = { 'ร้านค้า': 'store', 'เกษตรกร': 'farmer', 'แปลงทดลอง': 'trial' }[data.formType];
-            if (type) generateForm(type, data);
-        }
-
-        function renderDetailPage(data) {
-             pageContainer.innerHTML = `
-                <div class="p-4">
-                    <header class="flex items-center mb-6">
-                        <button onclick="navigate('customers')" class="text-xl text-gray-500 mr-4"><i class="fas fa-arrow-left"></i></button>
-                        <h1 class="text-3xl font-bold text-gray-800">${data['ชื่อร้านค้า'] || data['ชื่อเกษตรกร'] || 'รายละเอียด'}</h1>
-                    </header>
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm space-y-3">
-                        ${Object.entries(data).map(([key, value]) => {
-                            if (!value || ['formType', 'rowId', 'sheetRow', 'createdBy', 'createdDate', 'creatorRole', 'creatorTeam'].includes(key)) return '';
-                            return `<div class="flex justify-between border-b border-gray-200 py-2"><p class="text-gray-500">${key}</p><p class="font-semibold text-gray-800 text-right">${value}</p></div>`
-                        }).join('')}
-                        <button onclick='handleEditClick(${JSON.stringify(data).replace(/'/g, "&apos;")})' class="w-full mt-4 btn-primary font-bold py-3 px-4 rounded-lg">แก้ไขข้อมูล</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function initDashboard() {
-            // ... (Dashboard logic is unchanged)
-        }
-        function initDashboardCharts() {
-            // ... (Chart logic is unchanged)
-        }
         function initMap() {
-            // ... (Map logic is unchanged)
+            const page = document.getElementById('map-page');
+            page.innerHTML = `<div id="map" class="h-full w-full rounded-lg shadow-md min-h-[calc(100vh-160px)]"></div>`;
+            if (map) { map.remove(); map = null; }
+            map = L.map('map').setView([13.7563, 100.5018], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const coords = [pos.coords.latitude, pos.coords.longitude];
+                    map.setView(coords, 13);
+                    L.marker(coords, { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] }), isCurrentUser: true }).addTo(map).bindPopup('<b>ตำแหน่งของคุณ</b>').openPopup();
+                });
+            }
+            if (allData.length > 0) plotDataOnMap();
         }
+
         function plotDataOnMap() {
-            // ... (Map plotting logic is unchanged)
+            if (!map) return;
+            map.eachLayer(layer => { if (layer instanceof L.Marker && !layer.options.isCurrentUser) map.removeLayer(layer); });
+            allData.forEach(item => {
+                const gps = item['GPS'] || item['GPSแปลง'];
+                if (gps && gps.includes(',')) {
+                    const [lat, lon] = gps.split(',').map(s => parseFloat(s.trim()));
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        const name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || 'N/A';
+                        const iconColor = { 'ร้านค้า': 'blue', 'เกษตรกร': 'green', 'แปลงทดลอง': 'violet' }[item.formType] || 'grey';
+                        const markerIcon = new L.Icon({ iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${iconColor}.png`, shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] });
+                        L.marker([lat, lon], {icon: markerIcon}).addTo(map).bindPopup(`<b>${name}</b><br><a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="text-blue-600 font-bold">นำทาง</a>`);
+                    }
+                }
+            });
         }
         
         function showMessageModal(message) {
@@ -484,7 +547,8 @@
         function closeMessageModal() { document.getElementById('message-modal').classList.add('hidden'); }
 
         loginForm.addEventListener('submit', handleLogin);
-        document.getElementById('logout-button')?.addEventListener('click', handleLogout);
+        document.getElementById('logout-button').addEventListener('click', handleLogout);
+        backButton.addEventListener('click', () => showPage('feed'));
         
         checkSession();
     </script>
