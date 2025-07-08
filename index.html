@@ -76,7 +76,7 @@
     <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex flex-col items-center justify-center text-white"><i class="fas fa-spinner fa-spin text-4xl"></i><p id="loading-text" class="mt-4 text-lg">กำลังโหลดข้อมูล...</p></div>
 
     <script>
-        // --- All App Logic (Unchanged) ---
+        // --- Global State and Element Selectors ---
         let currentUser = null, allData = [], map = null, doughnutChartInstance = null;
         const loginView = document.getElementById('login-view');
         const mainAppView = document.getElementById('main-app-view');
@@ -86,10 +86,11 @@
         const backButton = document.getElementById('back-button');
         const loadingOverlay = document.getElementById('loading-overlay');
         const loadingText = document.getElementById('loading-text');
+
+        //*** IMPORTANT! Make sure this URL is correct ***
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyWYuttyt5bFw3h7jzUhEaWBpowkLikqILd5kaL0V6b_jveMP1Tdpd1gPGqJmqexcLS1g/exec';
-        
-        // --- All functions (apiCall, handleLogin, showPage, generateForm, etc. are the same) ---
-        // ... (The entire block of your app's JavaScript logic goes here, it is correct)
+
+        // --- Core API and Authentication Functions ---
         async function apiCall(payload, loadingMessage = null) {
             if (loadingMessage) {
                 loadingText.textContent = loadingMessage;
@@ -158,6 +159,7 @@
             }
         }
         
+        // --- Page Navigation and Rendering ---
         function showPage(pageName, detailData = null) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             const newPage = document.getElementById(`${pageName}-page`);
@@ -258,17 +260,20 @@
             });
         }
         
+        // --- Detail Page Rendering with Image Gallery ---
         function renderDetailPage(data) {
             const container = document.getElementById('detail-page');
             let detailsHtml = '', linkedHtml = '', galleryHtml = '';
             const mainName = data['ชื่อร้านค้า'] || data['ชื่อเกษตรกร'] || data['เกษตรกรเจ้าของแปลง'] || 'รายละเอียด';
             
+            // Render main details (excluding image data)
             for (const [key, value] of Object.entries(data)) {
                 if (value && !['formType', 'rowId', 'sheetRow', 'images'].some(k => key.startsWith(k)) && !key.startsWith('creator')) {
                     detailsHtml += `<div class="flex justify-between py-3 border-b"><span class="text-gray-500 w-1/3 break-words">${key}</span><span class="font-semibold text-right w-2/3 break-words">${value}</span></div>`;
                 }
             }
 
+            // Render linked data
             if (data.formType === 'ร้านค้า') {
                 const linkedFarmers = allData.filter(f => f.formType === 'เกษตรกร' && f['ร้านค้าในสังกัด'] === data['ชื่อร้านค้า']);
                 if(linkedFarmers.length > 0) {
@@ -289,6 +294,7 @@
                 }
             }
             
+            // Render Image Gallery by Type
             if (data.images && data.images.length > 0) {
                 galleryHtml += `<h3 class="text-lg font-bold mt-6 mb-2 border-t pt-4">แกลเลอรีรูปภาพ</h3>`;
                 const imagesByType = data.images.reduce((acc, img) => {
@@ -320,6 +326,7 @@
             </div>`;
         }
         
+        // --- Form Generation and Handling ---
         function handleEditClick(rowId) {
             const data = allData.find(item => item.rowId === rowId);
             if (!data) {
@@ -506,18 +513,166 @@
             }
         }
         
-        function getGeoLocation(inputElId) { /* ... */ }
+        function getGeoLocation(inputElId) {
+            const inputEl = document.getElementById(inputElId);
+            const buttonEl = inputEl.nextElementSibling;
+            const originalHtml = buttonEl.innerHTML;
+            buttonEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            buttonEl.disabled = true;
+            showMessageModal('กำลังระบุตำแหน่ง...');
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        inputEl.value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+                        closeMessageModal();
+                        buttonEl.innerHTML = originalHtml;
+                        buttonEl.disabled = false;
+                    },
+                    err => {
+                        showMessageModal(`เกิดข้อผิดพลาด: ${err.message}`);
+                        buttonEl.innerHTML = originalHtml;
+                        buttonEl.disabled = false;
+                    }
+                );
+            } else { 
+                showMessageModal("เบราว์เซอร์ไม่รองรับ Geolocation");
+                buttonEl.disabled = false;
+            }
+        }
 
-        async function handleFormSubmit(e) { /* ... */ }
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังบันทึก...';
+            submitButton.disabled = true;
 
-        async function fetchData(force = false) { /* ... */ }
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            let imagesToUpload = [];
+            const imageInputs = form.querySelectorAll('.image-upload-input');
+            const fileReadPromises = [];
+
+            imageInputs.forEach(input => {
+                const imageType = input.dataset.imageType;
+                Array.from(input.files).forEach(file => {
+                    const promise = new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = () => resolve({
+                            fileName: file.name,
+                            mimeType: file.type,
+                            data: reader.result.split(',')[1],
+                            imageType: imageType
+                        });
+                        reader.onerror = reject;
+                    });
+                    fileReadPromises.push(promise);
+                });
+            });
+            
+            if(fileReadPromises.length > 0) {
+                loadingText.textContent = "กำลังเตรียมรูปภาพ...";
+                loadingOverlay.classList.remove('hidden');
+                imagesToUpload = await Promise.all(fileReadPromises);
+                loadingOverlay.classList.add('hidden');
+            }
+
+            const isEdit = data.rowId && data.rowId !== '';
+            const payload = { 
+                action: isEdit ? 'updateData' : 'saveData', 
+                payload: data, 
+                user: currentUser,
+                images: imagesToUpload
+            };
+
+            try {
+                const response = await apiCall(payload, "กำลังบันทึกข้อมูลและรูปภาพ...");
+                if (response.result === 'success') {
+                    showMessageModal(isEdit ? 'แก้ไขข้อมูลสำเร็จ!' : 'บันทึกข้อมูลสำเร็จ!');
+                    closeFormModal();
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await fetchData(true);
+                    showPage('feed');
+                } else { throw new Error(response.message || 'Unknown error from server'); }
+            } catch (error) {
+                console.error("Submit Error:", error);
+                showMessageModal(`เกิดข้อผิดพลาดในการบันทึก: ${error.message}`);
+            } finally {
+                submitButton.innerHTML = isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มข้อมูล';
+                submitButton.disabled = false;
+            }
+        }
+
+        async function fetchData(force = false) {
+            if (!currentUser) return;
+            if (allData.length > 0 && !force) {
+                renderAllTabs();
+                return;
+            }
+            const emptyFeedEl = document.getElementById('empty-feed');
+            if(emptyFeedEl) {
+                emptyFeedEl.textContent = 'กำลังโหลดข้อมูล...';
+                emptyFeedEl.classList.remove('hidden');
+            }
+            try {
+                const response = await apiCall({ action: 'getData', user: currentUser });
+                if(response.result === 'success' && Array.isArray(response.data)) {
+                    allData = response.data;
+                    renderDashboard();
+                    const currentPage = document.querySelector('.page-content.active')?.id.replace('-page','');
+                    if(currentPage === 'feed') {
+                       renderFeedPage();
+                    }
+                } else { throw new Error(response.message || "Invalid data format from server"); }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                if(emptyFeedEl) {
+                    emptyFeedEl.textContent = 'ไม่สามารถโหลดข้อมูลได้';
+                }
+            }
+        }
         
-        function initMap() { /* ... */ }
+        function initMap() {
+            const page = document.getElementById('map-page');
+            page.innerHTML = `<div id="map" class="h-full w-full rounded-lg shadow-md min-h-[calc(100vh-160px)]"></div>`;
+            if (map) { map.remove(); map = null; }
+            map = L.map('map').setView([13.7563, 100.5018], 6);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    const coords = [pos.coords.latitude, pos.coords.longitude];
+                    map.setView(coords, 13);
+                    L.marker(coords, { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] }), isCurrentUser: true }).addTo(map).bindPopup('<b>ตำแหน่งของคุณ</b>').openPopup();
+                });
+            }
+            if (allData.length > 0) plotDataOnMap();
+        }
 
-        function plotDataOnMap() { /* ... */ }
+        function plotDataOnMap() {
+            if (!map) return;
+            map.eachLayer(layer => { if (layer instanceof L.Marker && !layer.options.isCurrentUser) map.removeLayer(layer); });
+            allData.forEach(item => {
+                const gps = item['GPS'] || item['GPSแปลง'];
+                if (gps && gps.includes(',')) {
+                    const [lat, lon] = gps.split(',').map(s => parseFloat(s.trim()));
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        const name = item['ชื่อร้านค้า'] || item['ชื่อเกษตรกร'] || item['เกษตรกรเจ้าของแปลง'] || 'N/A';
+                        const iconColor = { 'ร้านค้า': 'blue', 'เกษตรกร': 'green', 'แปลงทดลอง': 'violet' }[item.formType] || 'grey';
+                        const markerIcon = new L.Icon({ iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-${iconColor}.png`, shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] });
+                        L.marker([lat, lon], {icon: markerIcon}).addTo(map).bindPopup(`<b>${name}</b><br><a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="text-blue-600 font-bold">นำทาง</a>`);
+                    }
+                }
+            });
+        }
         
-        function showMessageModal(message) { /* ... */ }
-        function closeMessageModal() { /* ... */ }
+        function showMessageModal(message) {
+            const modal = document.getElementById('message-modal');
+            document.getElementById('modal-message').innerText = message;
+            modal.classList.remove('hidden');
+        }
+        function closeMessageModal() { document.getElementById('message-modal').classList.add('hidden'); }
 
         // --- Initial Setup Event Listeners ---
         loginForm.addEventListener('submit', handleLogin);
